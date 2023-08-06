@@ -8,52 +8,74 @@ const int tileSize = 80;	//size of tiles
 int tileCheck = 0;			//check if tile is white or black
 int tileValue[8][8];			//value of tile
 
-int size = 56;	//size of piece
+int size = 5;	//size of piece
 
-Sprite pieces[24];	//array of pieces
-
+Sprite pieces[24];	//array of piec
 int board[8][8] = {	//board array
-	-1, 0,-1, 0,-1, 0,-1, 0,// --------
-	 0,-1, 0,-1, 0,-1, 0,-1,// player 1
-	-1, 0,-1, 0,-1, 0,-1, 0,// --------
+	0,-1, 0,-1, 0,-1, 0,-1,	// --------
+	-1, 0,-1, 0,-1, 0,-1, 0,// player 1
+	0,-1, 0,-1, 0,-1, 0,-1,// --------
 
-	 0, 0, 0, 0, 0, 0, 0, 0,
-	 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0,
 
-	 0,-1, 0,-1, 0,-1, 0,-1,// --------
-	-1, 0,-1, 0,-1, 0,-1, 0,// player 2
-	 0,-1, 0,-1, 0,-1, 0,-1 // --------
+	1, 0, 1, 0, 1, 0, 1, 0,// --------
+	0, 1, 0, 1, 0, 1, 0, 1, // player 2
+	1, 0, 1, 0, 1, 0, 1, 0// --------
+	
 };
 
+void loadPosition(){
+	int k = 0;
+	for(int i = 0; i < boardSize; i++){
+		for(int j = 0; j < boardSize; j++){
+			int n = board[i][j];
+			if(!n){
+				continue;
+			}
+			else if(n == -1){
+				pieces[k].setTextureRect(IntRect(0.2 * 0, 0, 0.2, 0.2));
+				pieces[k].setPosition(j * 5, i * 5);
+				k++;
+			}
+			else if(n == 1){
+				pieces[k].setTextureRect(IntRect(0.2 * 1, 0, 0.2, 0.2));
+				pieces[k].setPosition(j * 5, i * 5);
+				k++;
+			}
+		}
+	}	
+}
 
-RectangleShape tile(sf::Vector2f(tileSize, tileSize));	//create tile   (global variable)
-CircleShape checkerPiece(40.f);                         //create checker piece  (global variable)
 
-void drawChessBoard(RenderWindow &window){              //draw chess board function
+//RectangleShape tile(sf::Vector2f(tileSize, tileSize));	//create tile   (global variable)
+// CircleShape checkerPiece(40.f);                         //create checker piece  (global variable)
+
+// void drawChessBoard(RenderWindow &window){              //draw chess board function
 
 	
-	bool isWhite = true;	//is tile white or black
+// 	bool isWhite = true;	//is tile white or black
 
-	for(int i = 0; i < boardSize; i++){                 //for loop
-		for(int j = 0; j < boardSize; j++){             //nested for loop
-			tileValue[i][j] = -99;                      //set tile value to -99
-		}
-	}
+// 	for(int i = 0; i < boardSize; i++){                 //for loop
+// 		for(int j = 0; j < boardSize; j++){             //nested for loop
+// 			tileValue[i][j] = -99;                      //set tile value to -99
+// 		}
+// 	}
    
-    for (int i = 0; i < boardSize; ++i){		//draw board
-        for (int j = 0; j < boardSize; ++j){	//draw board
+//     for (int i = 0; i < boardSize; ++i){		//draw board
+//         for (int j = 0; j < boardSize; ++j){	//draw board
 
-            tile.setFillColor(isWhite ? sf::Color::White : sf::Color::Black);	//if white true then color white else color black
-            tile.setPosition(j * tileSize, i * tileSize);						//set position of tile within the row
-            window.draw(tile);													//draw tile
-			if(tile.getFillColor() == sf::Color::Black){                        //if tile is black
-				tileValue[i][j] = 0;                                            //set tile value to 0
-			}
-            isWhite = !isWhite;													//flip color
-        }
-        isWhite = !isWhite;														//flip color before next row
-    }	
-}
+//             tile.setFillColor(isWhite ? sf::Color::White : sf::Color::Black);	//if white true then color white else color black
+//             tile.setPosition(j * tileSize, i * tileSize);						//set position of tile within the row
+//             window.draw(tile);													//draw tile
+// 			if(tile.getFillColor() == sf::Color::Black){                        //if tile is black
+// 				tileValue[i][j] = 0;                                            //set tile value to 0
+// 			}
+//             isWhite = !isWhite;													//flip color
+//         }
+//         isWhite = !isWhite;														//flip color before next row
+//     }	
+// }
 //--
 // void drawCheckerPiece(RenderWindow &window){        //draw chess board function
 
@@ -93,7 +115,7 @@ void drawChessBoard(RenderWindow &window){              //draw chess board funct
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(600, 400), "Checkers"); //create window
+	sf::RenderWindow window(sf::VideoMode(453, 454), "Checkers"); //create window
 
 	int fps = 60;	//set fps to 60
 	window.setFramerateLimit(fps);	//set fps limit
@@ -103,15 +125,41 @@ int main()
 	float speed = 0.1;		//speed of piece
 
 
-	Texture red;								//create texture
+	Texture red, black, board;								//create texture
 	if(!red.loadFromFile("red_piece.png")){		//if texture does not load
 		cout << "Error loading red piece" << endl;	//print error message
 	}
+	if(!board.loadFromFile("board0.png")){		//if texture does not load
+		cout << "Error loading the game board" << endl;	//print error message
+	}
+	if(!black.loadFromFile("black.png")){		//if texture does not load
+		cout << "Error loading black piece" << endl;	//print error message
+	}
+
+	Sprite boardSprite;								//create sprite
+	boardSprite.setTexture(board);					//set texture to sprite
+	//boardSprite.setScale(0.25, 0.25);					//set scale of sprite
+
+	loadPosition();		//load position of pieces
+
 
 	Sprite redPiece;  							//create sprite
 	redPiece.setTexture(red);					//set texture to sprite
 	redPiece.setScale(0.05, 0.05);				//set scale of sprite
 
+	Sprite blackPiece;  							//create sprite
+	blackPiece.setTexture(black);					//set texture to sprite	
+	blackPiece.setScale(0.05, 0.05);				//set scale of sprite
+
+
+	for(int i = 0; i < 12; i++){		//for loop
+		pieces[i].setTexture(red);		//set texture to sprite
+		pieces[i].setScale(0.05, 0.05);	//set scale of sprite
+	}
+	for(int i = 0; i < 12; i++){		//for loop
+		pieces[i].setTexture(red);		//set texture to sprite
+		pieces[i].setScale(0.05, 0.05);	//set scale of sprite
+	}
 
     while (window.isOpen()) //while window is open
     {
@@ -159,11 +207,14 @@ int main()
 
         window.clear(); //clear window
         //drawChessBoard(window);        //draw chess board
-		window.draw(redPiece); 		//draw red piece
+		window.draw(boardSprite);	//draw red piece
+		for(int i = 0; i < 24; i++){	//for loop
+			window.draw(pieces[i]);		//draw pieces
+		}
         window.display();    //display window
     }
 
-		window.display();       //display window
+		
 	
     return 0;
 } 
