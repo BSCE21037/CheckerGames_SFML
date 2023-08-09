@@ -4,7 +4,7 @@ using namespace std;
 using namespace sf;
 
 const int boardSize = 8;	//size of board
-const int tileSize = 80;	//size of tiles
+const int tileSize = 59;	//size of tiles
 int tileCheck = 0;			//check if tile is white or black
 int tileValue[8][8];			//value of tile
 
@@ -27,6 +27,9 @@ int board[8][8] = {	//board array
 
 void loadPosition(){
 	int k = 0;
+	// float xOffset = 0.1 * tileSize; // Adjust this value for horizontal spacing
+    // float yOffset = 0.0000000001 * tileSize; // Adjust this value for vertical spacing
+
 	for(int i = 0; i < boardSize; i++){
 		for(int j = 0; j < boardSize; j++){
 			int n = board[i][j];
@@ -34,13 +37,13 @@ void loadPosition(){
 				continue;
 			}
 			else if(n == -1){
-				pieces[k].setTextureRect(IntRect(0.2 * 0, 0, 0.2, 0.2));
-				pieces[k].setPosition(j * 5, i * 5);
+				pieces[k].setTextureRect(IntRect(0.7 * 0, 0, 0.7, 0.7));
+				pieces[k].setPosition(j * tileSize, i * tileSize);
 				k++;
 			}
 			else if(n == 1){
-				pieces[k].setTextureRect(IntRect(0.2 * 1, 0, 0.2, 0.2));
-				pieces[k].setPosition(j * 5, i * 5);
+				pieces[k].setTextureRect(IntRect(0.7 * 1, 0, 0.7, 0.7));
+				pieces[k].setPosition(j * tileSize, i * tileSize);
 				k++;
 			}
 		}
@@ -123,7 +126,7 @@ int main()
 	bool movePiece = false;	//check if piece is moving
 	float dx = 0, dy = 0;	//delta x and delta y
 	float speed = 0.1;		//speed of piece
-
+	int n = 0;
 
 	Texture red, black, board;								//create texture
 	if(!red.loadFromFile("red_piece.png")){		//if texture does not load
@@ -145,19 +148,19 @@ int main()
 
 	Sprite redPiece;  							//create sprite
 	redPiece.setTexture(red);					//set texture to sprite
-	redPiece.setScale(0.05, 0.05);				//set scale of sprite
+	redPiece.setScale(0.02, 0.02);				//set scale of sprite
 
 	Sprite blackPiece;  							//create sprite
 	blackPiece.setTexture(black);					//set texture to sprite	
-	blackPiece.setScale(0.05, 0.05);				//set scale of sprite
+	//blackPiece.setScale(0.05, 0.05);				//set scale of sprite
 
 
 	for(int i = 0; i < 12; i++){		//for loop
 		pieces[i].setTexture(red);		//set texture to sprite
-		pieces[i].setScale(0.05, 0.05);	//set scale of sprite
+		pieces[i].setScale(0.02, 0.02);	//set scale of sprite
 	}
-	for(int i = 0; i < 12; i++){		//for loop
-		pieces[i].setTexture(red);		//set texture to sprite
+	for(int i = 12; i < 24; i++){		//for loop
+		pieces[i].setTexture(black);		//set texture to sprite
 		pieces[i].setScale(0.05, 0.05);	//set scale of sprite
 	}
 
@@ -172,11 +175,14 @@ int main()
 
 			case Event::MouseButtonPressed:    //if key is pressed    
                 if(event.mouseButton.button == Mouse::Left){    //if left mouse button is pressed
-					if(redPiece.getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)){	//if mouse is within bounds of sprite
-						movePiece = true;	//set move piece to true
-						dx = event.mouseButton.x - redPiece.getPosition().x;	//set delta x
-						dy = event.mouseButton.y - redPiece.getPosition().y;	//set delta y
+					for(int i=0; i<24; i++){
+						if(pieces[i].getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)){	//if mouse is within bounds of sprite
+							movePiece = true;	//set move piece to true
+							n = i;
+							dx = event.mouseButton.x - pieces[i].getPosition().x;	//set delta x
+							dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
 
+						}
 					}
                     cout << "mouse x: " << mousePos.x << endl;  //print mouse x position
                     cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
@@ -200,7 +206,7 @@ int main()
 
 			}
 			if(movePiece){	//if piece is moving
-				redPiece.setPosition(mousePos.x - dx, mousePos.y - dy);	//set position of piece
+				pieces[n].setPosition(mousePos.x - dx, mousePos.y - dy);	//set position of piece
 			}	
             
         }
