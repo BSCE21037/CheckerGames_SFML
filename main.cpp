@@ -197,6 +197,10 @@ int main()
             case Event::MouseButtonReleased:	//released
 				if(event.mouseButton.button == Mouse::Left){	//if left mouse button is released
 					movePiece = false;	//set move piece to false
+					//code for detecting the box/position of the piece
+					Vector2f p = pieces[n].getPosition() + Vector2f(tileSize/2, tileSize/2);	//get position of piece
+					Vector2f newPos = Vector2f(tileSize * int(p.x / tileSize), tileSize * int(p.y / tileSize));	//get new position of piece
+					pieces[n].setPosition(newPos);	//set position of piece
 				}
 				break;          //break
 
