@@ -11,17 +11,17 @@ int tileValue[8][8];			//value of tile
 int size = 5;	//size of piece
 
 Sprite pieces[24];	//array of piec
-int board[8][8] = {	//board array
-	0,-1, 0,-1, 0,-1, 0,-1,	// --------
-	-1, 0,-1, 0,-1, 0,-1, 0,// player 1
-	0,-1, 0,-1, 0,-1, 0,-1,// --------
+int board_arr[8][8] = {	//board array
+	-9, -1, -9,-1, -9,-1, -9,-1,	// --------
+	-1, -9,-1, -9,-1, -9,-1, -9,// player 1
+	-9, -1, -9,-1, -9,-1, -9,-1,// --------
 
-	0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0,
+	0, -9, 0, -9, 0, -9, 0, -9,
+	-9, 0, -9, 0, -9, 0, -9, 0,
 
-	1, 0, 1, 0, 1, 0, 1, 0,// --------
-	0, 1, 0, 1, 0, 1, 0, 1, // player 2
-	1, 0, 1, 0, 1, 0, 1, 0// --------
+	1, -9, 1, -9, 1, -9, 1, -9,// --------
+	-9, 1, -9, 1, -9, 1, -9, 1, // player 2
+	1, -9, 1, -9, 1, -9, 1, -9// --------
 	
 };
 
@@ -32,7 +32,7 @@ void loadPosition(){
 
 	for(int i = 0; i < boardSize; i++){
 		for(int j = 0; j < boardSize; j++){
-			int n = board[i][j];
+			int n = board_arr[i][j];
 			if(!n){
 				continue;
 			}
@@ -118,6 +118,7 @@ void loadPosition(){
 
 int main()
 {
+
 	sf::RenderWindow window(sf::VideoMode(453, 454), "Checkers"); //create window
 
 	int fps = 60;	//set fps to 60
@@ -194,15 +195,106 @@ int main()
                 }
                 break;        //break
             
-            case Event::MouseButtonReleased:	//released
+            case Event::MouseButtonReleased:
+				// if (event.mouseButton.button == Mouse::Left) {
+				// 	movePiece = false;
+
+				// 	// Get the center position of the dropped piece
+				// 	Vector2f p = pieces[n].getPosition() + Vector2f(tileSize / 2, tileSize / 2);
+
+				// 	// Convert pixel coordinates to grid coordinates
+				// 	int newRow = static_cast<int>(p.y / tileSize);
+				// 	int newCol = static_cast<int>(p.x / tileSize);
+
+				// 	// Check if the move is valid and within bounds
+				// 	if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize) {
+				// 		// Perform additional checks here based on game rules (e.g., valid diagonal move, capturing move)
+
+				// 		// Update the board array with the new piece position
+				// 		board_arr[newRow][newCol] = board_arr[n / 2][n % 2 == 0 ? 0 : 1];
+				// 		board_arr[n / 2][n % 2 == 0 ? 0 : 1] = 0;
+
+				// 		// Clear the previous position on the board
+				// 		int oldRow = n / 2;
+				// 		int oldCol = n % 2 == 0 ? 0 : 1;
+				// 		board_arr[oldRow][oldCol] = 0;
+
+				// 		// Update the position of the piece
+				// 		pieces[n].setPosition(newCol * tileSize, newRow * tileSize);
+
+				// 		// Print the updated board for debugging purposes
+				// 		cout << "Updated board:" << endl;
+				// 		for (int i = 0; i < boardSize; ++i) {
+				// 			for (int j = 0; j < boardSize; ++j) {
+				// 				cout << board_arr[i][j] << " ";
+				// 			}
+				// 			cout << endl;
+				// 		}
+				// 	}
+				// }
+
 				if(event.mouseButton.button == Mouse::Left){	//if left mouse button is released
 					movePiece = false;	//set move piece to false
-					//code for detecting the box/position of the piece
 					Vector2f p = pieces[n].getPosition() + Vector2f(tileSize/2, tileSize/2);	//get position of piece
+					Vector2f oldPos = pieces[n].getPosition();	//get old position of piece
 					Vector2f newPos = Vector2f(tileSize * int(p.x / tileSize), tileSize * int(p.y / tileSize));	//get new position of piece
-					pieces[n].setPosition(newPos);	//set position of piece
+					cout << "newPos: " << newPos.x << " " << newPos.y << endl;
+					if(board_arr[int(newPos.y / tileSize)][int(newPos.x / tileSize)] == -9){
+						//invalid move/ invalid tile
+						pieces[n].setPosition(oldPos);	//set position of piece
+						
+						
+					}
+					else{
+						//valid move
+						pieces[n].setPosition(newPos);	//set position of piece
+					}
+					//pieces[n].setPosition(newPos);	//set position of piece
+					oldPos = pieces[n].getPosition();	//get old position of piece
+				
 				}
-				break;          //break
+				
+				
+				break;
+			// case Event::MouseButtonReleased:
+			// 	if (event.mouseButton.button == Mouse::Left) {
+			// 		movePiece = false;
+
+			// 		// Get the center position of the dropped piece
+			// 		Vector2f p = pieces[n].getPosition() + Vector2f(tileSize / 2, tileSize / 2);
+
+			// 		// Convert pixel coordinates to grid coordinates
+			// 		int newRow = static_cast<int>(p.y / tileSize);
+			// 		int newCol = static_cast<int>(p.x / tileSize);
+
+			// 		// Check if the move is valid and within bounds
+			// 		if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize) {
+			// 			// Perform additional checks here based on game rules (e.g., valid diagonal move, capturing move)
+
+			// 			// Update the board_arr array with the new piece position
+			// 			board_arr[newRow][newCol] = board_arr[n / 2][n % 2 == 0 ? 0 : 1];
+			// 			board_arr[n / 2][n % 2 == 0 ? 0 : 1] = 0;
+
+			// 			// Clear the previous position on the board
+			// 			int oldRow = n / 2;
+			// 			int oldCol = n % 2 == 0 ? 0 : 1;
+			// 			board_arr[oldRow][oldCol] = 0;
+
+			// 			// Update the position of the piece
+			// 			pieces[n].setPosition(newCol * tileSize, newRow * tileSize);
+
+			// 			// Print the updated board_arr for debugging purposes
+			// 			cout << "Updated board_arr:" << endl;
+			// 			for (int i = 0; i < boardSize; ++i) {
+			// 				for (int j = 0; j < boardSize; ++j) {
+			// 					cout << board_arr[i][j] << " ";
+			// 				}
+			// 				cout << endl;
+			// 			}
+			// 		}
+			// 	}
+			// 	break;
+
 
 			case Event::Closed: //if window is closed
 				window.close();     //close window
@@ -227,4 +319,4 @@ int main()
 		
 	
     return 0;
-} 
+}
