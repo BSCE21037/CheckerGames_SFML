@@ -28,8 +28,6 @@ int board_arr[8][8] = {	//board array
 
 void loadPosition(){
 	int k = 0;
-	// float xOffset = 0.1 * tileSize; // Adjust this value for horizontal spacing
-    // float yOffset = 0.0000000001 * tileSize; // Adjust this value for vertical spacing
 
 	for(int i = 0; i < boardSize; i++){
 		for(int j = 0; j < boardSize; j++){
@@ -120,7 +118,7 @@ void loadPosition(){
 int main()
 {
 
-	sf::RenderWindow window(sf::VideoMode(453, 454), "Checkers"); //create window
+	RenderWindow window(VideoMode(453, 454), "Checkers"); //create window
 
 	int fps = 60;	//set fps to 60
 	window.setFramerateLimit(fps);	//set fps limit
@@ -147,18 +145,14 @@ int main()
 
 	Sprite boardSprite;								//create sprite
 	boardSprite.setTexture(board);					//set texture to sprite
-	//boardSprite.setScale(0.25, 0.25);					//set scale of sprite
 
 	loadPosition();		//load position of pieces
 
-
 	Sprite redPiece;  							//create sprite
-	redPiece.setTexture(red);					//set texture to sprite
-	redPiece.setScale(0.02, 0.02);				//set scale of sprite
+	redPiece.setTexture(red);					//set texture to sprite	
 
 	Sprite blackPiece;  							//create sprite
 	blackPiece.setTexture(black);					//set texture to sprite	
-	//blackPiece.setScale(0.05, 0.05);				//set scale of sprite
 
 
 	for(int i = 0; i < 12; i++){		//for loop
@@ -188,39 +182,15 @@ int main()
 							dx = event.mouseButton.x - pieces[i].getPosition().x;	//set delta x
 							dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
             				oldPos = pieces[i].getPosition();					// Store the original position before moving
-							originalPos = pieces[n].getPosition();
-
+							originalPos = pieces[n].getPosition();	// Store the original position before moving
 						}
 					}
                     cout << "mouse x: " << mousePos.x << endl;  //print mouse x position
                     cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
-					// cout << "tile x: " << mousePos.x / tileSize << endl;    //print tile x position
-					// cout << "tile y: " << mousePos.y / tileSize << endl;    //print tile y position
-					// cout << "tile value: " << tileValue[mousePos.y / tileSize][mousePos.x / tileSize] << endl;  //print tile value
-					//write a code for the movement of the piece
-                    
                 }
                 break;        //break
             
             case Event::MouseButtonReleased:	//if key is released
-
-				// if(event.mouseButton.button == Mouse::Left){	//if left mouse button is released
-				// 	movePiece = false;	//set move piece to false
-				// 	Vector2f p = pieces[n].getPosition() + Vector2f(tileSize/2, tileSize/2);	//get position of piece
-				// 	//oldPos = static_cast<Vector2f>(mousePos);;	//create vector2f
-				// 	Vector2f newPos = Vector2f(tileSize * int(p.x / tileSize), tileSize * int(p.y / tileSize));	//get new position of piece
-				// 	cout << "newPos: " << newPos.x << " " << newPos.y << endl;
-				// 	if(board_arr[int(newPos.y / tileSize)][int(newPos.x / tileSize)] == -9){
-				// 		//invalid move/ invalid tile
-				// 		pieces[n].setPosition(oldPos);	//set position of piece
-				// 		//pieces[n].setPosition(dx,dy);	//set position of piece
-				// 	}
-				// 	else{
-				// 		//valid move
-				// 		pieces[n].setPosition(newPos);	//set position of piece
-				// 	}
-				// }
-				// break;	//break
 				
 				if (event.mouseButton.button == Mouse::Left) {
 					movePiece = false;
@@ -232,35 +202,35 @@ int main()
 					int newRow = static_cast<int>(p.y / tileSize);
 					int newCol = static_cast<int>(p.x / tileSize);
 
+					int oldRow = static_cast<int>(oldPos.y / tileSize);
+					int oldCol = static_cast<int>(oldPos.x / tileSize);
+
 					// Calculate the new position based on grid coordinates
 					Vector2f newPos = Vector2f(newCol * tileSize, newRow * tileSize);
 
 					// Check if the move is valid and within bounds
 					if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
-						board_arr[newRow][newCol] != -9) {
+						board_arr[newRow][newCol] != 0) {
 						// Valid move
 						pieces[n].setPosition(newPos);
+						// board_arr[newRow][newCol] = 1;
+						// board_arr[static_cast<int>(oldPos.y / tileSize)][static_cast<int>(oldPos.x / tileSize)] = 0;
+
 					} else {
 						// Invalid move, revert to the original position
 						pieces[n].setPosition(originalPos);
 					}
 				}
-
 				break;	//break
-
-
 			case Event::Closed: //if window is closed
 				window.close();     //close window
 				break;                  //break
-
 			}
 			if(movePiece){	//if piece is moving
 				pieces[n].setPosition(mousePos.x - dx, mousePos.y - dy);	//set position of piece
 				oldPos = pieces[n].getPosition(); // Update oldPos while the piece is being moved
-			}	
-            
+			}	  
         }
-
         window.clear(); //clear window
         //drawChessBoard(window);        //draw chess board
 		window.draw(boardSprite);	//draw red piece
@@ -269,8 +239,5 @@ int main()
 		}
         window.display();    //display window
     }
-
-		
-	
     return 0;
 }
