@@ -225,15 +225,29 @@ int main()
 							// Invalid move, revert to the original position
 							pieces[n].setPosition(originalPos);
 						}
+						else if(board_arr[newRow][newCol] == -9){
+							// Invalid move, revert to the original position
+							pieces[n].setPosition(originalPos);
+						}
+
 						// board_arr[newRow][newCol] = 1;
 						// board_arr[static_cast<int>(oldPos.y / tileSize)][static_cast<int>(oldPos.x / tileSize)] = 0;
 
-					} else {
+					} else if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
+						board_arr[newRow][newCol] == -9) {
 						// Invalid move, revert to the original position
 						pieces[n].setPosition(originalPos);
 					}
+
 						cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
 						cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
+						// print whole board values
+						for(int i = 0; i < boardSize; i++){
+							for(int j = 0; j < boardSize; j++){
+								cout << board_arr[i][j] << " ";
+							}
+							cout << endl;
+						}
 				}
 				break;	//break
 			case Event::Closed: //if window is closed
