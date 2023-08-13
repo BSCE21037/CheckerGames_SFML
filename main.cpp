@@ -202,17 +202,29 @@ int main()
 					int newRow = static_cast<int>(p.y / tileSize);
 					int newCol = static_cast<int>(p.x / tileSize);
 
-					int oldRow = static_cast<int>(oldPos.y / tileSize);
-					int oldCol = static_cast<int>(oldPos.x / tileSize);
+					int oldRow = static_cast<int>(originalPos.y / tileSize);
+					int oldCol = static_cast<int>(originalPos.x / tileSize);
 
 					// Calculate the new position based on grid coordinates
 					Vector2f newPos = Vector2f(newCol * tileSize, newRow * tileSize);
 
 					// Check if the move is valid and within bounds
 					if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
-						board_arr[newRow][newCol] != 0) {
+						board_arr[newRow][newCol] != -9) {
 						// Valid move
-						pieces[n].setPosition(newPos);
+						if(board_arr[newRow][newCol] == 0){
+							pieces[n].setPosition(newPos);
+							board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+							board_arr[oldRow][oldCol] = 0;
+						}
+						else if(board_arr[newRow][newCol] == 1){
+							// Invalid move, revert to the original position
+							pieces[n].setPosition(originalPos);
+						}
+						else if(board_arr[newRow][newCol] == -1){
+							// Invalid move, revert to the original position
+							pieces[n].setPosition(originalPos);
+						}
 						// board_arr[newRow][newCol] = 1;
 						// board_arr[static_cast<int>(oldPos.y / tileSize)][static_cast<int>(oldPos.x / tileSize)] = 0;
 
@@ -220,6 +232,8 @@ int main()
 						// Invalid move, revert to the original position
 						pieces[n].setPosition(originalPos);
 					}
+						cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
+						cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
 				}
 				break;	//break
 			case Event::Closed: //if window is closed
