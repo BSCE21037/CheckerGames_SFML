@@ -298,10 +298,17 @@ int main()
 								// Valid move
 								if(board_arr[newRow][newCol] == 0){
 									if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0){
-										pieces[n].setPosition(newPos);
-										board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-										board_arr[oldRow][oldCol] = 0;
-										player1.pieceSelected = false;
+										 if ((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow)) {
+											pieces[n].setPosition(newPos);
+											board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+											board_arr[oldRow][oldCol] = 0;
+											player1.pieceSelected = false;
+										}
+										else{
+											// Invalid move, revert to the original position
+											player1.switchPlayerTurn();	//switch player turn
+											pieces[n].setPosition(originalPos);
+										}
 									}
 									else{
 										// Invalid move, revert to the original position
@@ -311,20 +318,24 @@ int main()
 								}
 								else if(board_arr[newRow][newCol] == 1){
 									// Invalid move, revert to the original position
+									player1.switchPlayerTurn();	//switch player turn
 									pieces[n].setPosition(originalPos);
 								}
 								else if(board_arr[newRow][newCol] == -1){
 									// Invalid move, revert to the original position
+									player1.switchPlayerTurn();	//switch player turn
 									pieces[n].setPosition(originalPos);
 								}
 								else if(board_arr[newRow][newCol] == -9){
 									// Invalid move, revert to the original position
+									player1.switchPlayerTurn();	//switch player turn
 									pieces[n].setPosition(originalPos);
 								}
 
 						} else if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
 							board_arr[newRow][newCol] == -9) {
 							// Invalid move, revert to the original position
+							player1.switchPlayerTurn();	//switch player turn
 							pieces[n].setPosition(originalPos);
 						}
 
