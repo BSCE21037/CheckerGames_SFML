@@ -233,10 +233,10 @@ int main()
 									dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
 									oldPos = pieces[i].getPosition();					// Store the original position before moving
 									originalPos = pieces[n].getPosition();	// Store the original position before moving
-									player1.switchPlayerTurn();	//switch player turn
+									//player1.switchPlayerTurn();	//switch player turn
 								}
 								else{
-									cout << "It is Red Player turn" << endl;	//print message
+									cout << "It is Black Player turn" << endl;	//print message
 									player1.notYourTurn = 1;	//set not your turn to 1
 								}
 
@@ -251,10 +251,10 @@ int main()
 									dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
 									oldPos = pieces[i].getPosition();					// Store the original position before moving
 									originalPos = pieces[n].getPosition();	// Store the original position before moving
-									player1.switchPlayerTurn();	//switch player turn
+									//player1.switchPlayerTurn();	//switch player turn
 								}
 								else{
-									cout << "It is Black Player turn" << endl;	//print message
+									cout << "It is Red Player turn" << endl;	//print message
 									player1.notYourTurn = 1;	//set not your turn to 1
 								}
 							}
@@ -279,12 +279,13 @@ int main()
 					int oldRow = static_cast<int>(originalPos.y / tileSize);
 					int oldCol = static_cast<int>(originalPos.x / tileSize);
 
+					// Calculate the new position based on grid coordinates
+					Vector2f newPos = Vector2f(newCol * tileSize, newRow * tileSize);
+
+
 					if (player1.pieceSelected == true) {
 					
-						movePiece = false;
-
-						// Calculate the new position based on grid coordinates
-						Vector2f newPos = Vector2f(newCol * tileSize, newRow * tileSize);
+						movePiece = false;	//set move piece to false
 
 						if(player1.notYourTurn == 1){
 							player1.notYourTurn = 0;
@@ -294,9 +295,17 @@ int main()
 							board_arr[newRow][newCol] != -9) {
 							// Valid move
 							if(board_arr[newRow][newCol] == 0){
-								pieces[n].setPosition(newPos);
-								board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-								board_arr[oldRow][oldCol] = 0;
+								if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0) {
+									// Valid move, update the board and piece positions
+									pieces[n].setPosition(newPos);
+									board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+									board_arr[oldRow][oldCol] = 0;
+									player1.switchPlayerTurn();	//switch player turn
+									player1.pieceSelected = false;	//set piece selected to false
+								} else {
+									// Invalid move, revert to the original position
+									pieces[n].setPosition(originalPos);
+								}
 							}
 							else if(board_arr[newRow][newCol] == 1){
 								// Invalid move, revert to the original position
@@ -316,6 +325,36 @@ int main()
 							// Invalid move, revert to the original position
 							pieces[n].setPosition(originalPos);
 						}
+						// int oldRow = static_cast<int>(originalPos.y / tileSize);
+						// int oldCol = static_cast<int>(originalPos.x / tileSize);
+						// int newRow = static_cast<int>(newPos.y / tileSize);
+						// int newCol = static_cast<int>(newPos.x / tileSize);
+
+						// if (player1.isCaptureValid(oldRow, oldCol, newRow, newCol)) {
+						// 	// Capture is valid, execute the move
+						// 	int captureRow = (oldRow + newRow) / 2;
+						// 	int captureCol = (oldCol + newCol) / 2;
+
+						// 	board_arr[captureRow][captureCol] = 0; // Remove captured piece
+						// 	board_arr[newRow][newCol] = player1.currentPlayerPiece; // Move capturing piece
+						// 	board_arr[oldRow][oldCol] = 0; // Empty the original position
+						// 	cout << "capture" << endl;
+
+						// 	// Check if the same piece can make another capture
+						// 	if (player1.canPieceCaptureAgain(newRow, newCol)) {
+						// 		// Allow the player to continue capturing
+						// 		// Update currentPlayerPiece and other variables if needed
+						// 	} else {
+						// 		// End the player's turn and switch turns
+						// 		//player1.switchPlayerTurn();
+						// 	}
+						// } else {
+						// 	// Regular move without capturing
+						// 	board_arr[newRow][newCol] = player1.currentPlayerPiece; // Move the piece
+						// 	board_arr[oldRow][oldCol] = 0; // Empty the original position
+						// 	//player1.switchPlayerTurn(); // End the player's turn
+						// }
+						// player1.pieceSelected = false; // Reset the piece selection
 
 						cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
 						cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
@@ -326,79 +365,6 @@ int main()
 							}
 							cout << endl;
 						}
-
-					// 	if (player1.isCaptureValid(oldRow, oldCol, newRow, newCol)) {
-					// 		// Check if capturing is valid
-					// 		int captureRow = (oldRow + newRow) / 2;
-					// 		int captureCol = (oldCol + newCol) / 2;
-
-					// 		if (board_arr[captureRow][captureCol] == player1.opponentPiece) {
-					// 			// Capture opponent's piece
-					// 			board_arr[captureRow][captureCol] = 0;
-					// 			board_arr[newRow][newCol] = player1.currentPlayerPiece;
-					// 			board_arr[oldRow][oldCol] = 0;
-
-					// 			// Check if the same piece can make another capture
-					// 			if (player1.canPieceCaptureAgain(newRow, newCol)) {
-					// 				// Allow the player to continue capturing
-					// 				board_arr[captureRow][captureCol] = 0;
-					// 				board_arr[newRow][newCol] = player1.currentPlayerPiece;
-					// 				board_arr[oldRow][oldCol] = 0;
-					// 				// Update the currentPlayerPiece, originalPos, etc.
-					// 			} else {
-					// 				// End the player's turn and switch turns
-					// 				player1.switchPlayerTurn();
-					// 			}
-					// 		} else {
-					// 			// Invalid capture, revert to original position
-					// 			pieces[n].setPosition(originalPos);
-					// 		}
-					// 	} else {
-					// 		// Regular move without capturing
-					// 		// Update the board and switch turns
-					// 		board_arr[newRow][newCol] = player1.currentPlayerPiece;
-					// 		board_arr[oldRow][oldCol] = 0;
-					// 		//player1.switchPlayerTurn();
-					// 	}
-					// 	player1.pieceSelected = false;
-						
-						
-					// }
-					// else{
-					// 	cout << "Player , please select a piece to move!" << endl;
-					// }
-					// if (player1.isCaptureValid(oldRow, oldCol, newRow, newCol)) {
-					// 	int captureRow = (oldRow + newRow) / 2;
-					// 	int captureCol = (oldCol + newCol) / 2;
-
-					// 	if (board_arr[captureRow][captureCol] == player1.opponentPiece) {
-					// 		// Capture opponent's piece
-					// 		board_arr[captureRow][captureCol] = 0;
-					// 		board_arr[newRow][newCol] = player1.currentPlayerPiece;
-					// 		board_arr[oldRow][oldCol] = 0;
-
-					// 		// Check if the same piece can make another capture
-					// 		if (player1.canPieceCaptureAgain(newRow, newCol)) {
-					// 			// Allow the player to continue capturing
-					// 			board_arr[captureRow][captureCol] = 0;
-					// 			board_arr[newRow][newCol] = player1.currentPlayerPiece;
-					// 			board_arr[oldRow][oldCol] = 0;
-					// 			// Update the currentPlayerPiece, originalPos, etc.
-					// 		} else {
-					// 			// End the player's turn and switch turns
-					// 			player1.switchPlayerTurn();
-					// 		}
-					// 	} else {
-					// 		// Invalid capture, revert to original position
-					// 		pieces[n].setPosition(originalPos);
-					// 	}
-					// } else {
-					// 	// Regular move without capturing
-					// 	// Update the board and switch turns
-					// 	board_arr[newRow][newCol] = player1.currentPlayerPiece;
-					// 	board_arr[oldRow][oldCol] = 0;
-					// 	player1.switchPlayerTurn();
-					// }
 					}
 				}else{
 					cout << "Player , please select a piece to move!" << endl;
