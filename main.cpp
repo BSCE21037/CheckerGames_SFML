@@ -233,7 +233,7 @@ int main()
 									dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
 									oldPos = pieces[i].getPosition();					// Store the original position before moving
 									originalPos = pieces[n].getPosition();	// Store the original position before moving
-									//player1.switchPlayerTurn();	//switch player turn
+									player1.switchPlayerTurn();	//switch player turn
 								}
 								else{
 									cout << "It is Black Player turn" << endl;	//print message
@@ -251,7 +251,7 @@ int main()
 									dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
 									oldPos = pieces[i].getPosition();					// Store the original position before moving
 									originalPos = pieces[n].getPosition();	// Store the original position before moving
-									//player1.switchPlayerTurn();	//switch player turn
+									player1.switchPlayerTurn();	//switch player turn
 								}
 								else{
 									cout << "It is Red Player turn" << endl;	//print message
@@ -282,7 +282,6 @@ int main()
 					// Calculate the new position based on grid coordinates
 					Vector2f newPos = Vector2f(newCol * tileSize, newRow * tileSize);
 
-
 					if (player1.pieceSelected == true) {
 					
 						movePiece = false;	//set move piece to false
@@ -295,17 +294,10 @@ int main()
 							board_arr[newRow][newCol] != -9) {
 							// Valid move
 							if(board_arr[newRow][newCol] == 0){
-								if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0) {
-									// Valid move, update the board and piece positions
-									pieces[n].setPosition(newPos);
-									board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-									board_arr[oldRow][oldCol] = 0;
-									player1.switchPlayerTurn();	//switch player turn
-									player1.pieceSelected = false;	//set piece selected to false
-								} else {
-									// Invalid move, revert to the original position
-									pieces[n].setPosition(originalPos);
-								}
+								pieces[n].setPosition(newPos);
+								board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+								board_arr[oldRow][oldCol] = 0;
+								player1.pieceSelected = false;
 							}
 							else if(board_arr[newRow][newCol] == 1){
 								// Invalid move, revert to the original position
@@ -325,36 +317,6 @@ int main()
 							// Invalid move, revert to the original position
 							pieces[n].setPosition(originalPos);
 						}
-						// int oldRow = static_cast<int>(originalPos.y / tileSize);
-						// int oldCol = static_cast<int>(originalPos.x / tileSize);
-						// int newRow = static_cast<int>(newPos.y / tileSize);
-						// int newCol = static_cast<int>(newPos.x / tileSize);
-
-						// if (player1.isCaptureValid(oldRow, oldCol, newRow, newCol)) {
-						// 	// Capture is valid, execute the move
-						// 	int captureRow = (oldRow + newRow) / 2;
-						// 	int captureCol = (oldCol + newCol) / 2;
-
-						// 	board_arr[captureRow][captureCol] = 0; // Remove captured piece
-						// 	board_arr[newRow][newCol] = player1.currentPlayerPiece; // Move capturing piece
-						// 	board_arr[oldRow][oldCol] = 0; // Empty the original position
-						// 	cout << "capture" << endl;
-
-						// 	// Check if the same piece can make another capture
-						// 	if (player1.canPieceCaptureAgain(newRow, newCol)) {
-						// 		// Allow the player to continue capturing
-						// 		// Update currentPlayerPiece and other variables if needed
-						// 	} else {
-						// 		// End the player's turn and switch turns
-						// 		//player1.switchPlayerTurn();
-						// 	}
-						// } else {
-						// 	// Regular move without capturing
-						// 	board_arr[newRow][newCol] = player1.currentPlayerPiece; // Move the piece
-						// 	board_arr[oldRow][oldCol] = 0; // Empty the original position
-						// 	//player1.switchPlayerTurn(); // End the player's turn
-						// }
-						// player1.pieceSelected = false; // Reset the piece selection
 
 						cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
 						cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
