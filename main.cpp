@@ -56,8 +56,7 @@ public:
 		}
 		return false;
 	}
-
-
+	
 };
 
 Player player1;
@@ -92,6 +91,45 @@ void loadPosition(){
 			}
 		}
 	}	
+}
+
+void Kill(int oldRow, int oldCol, int newRow, int newCol){
+	if (player1.isCaptureValid(oldRow, oldCol, newRow, newCol)) {
+		// Execute the capture
+		int captureRow = (oldRow + newRow) / 2;
+		int captureCol = (oldCol + newCol) / 2;
+
+		// Update the game state
+		board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+		board_arr[oldRow][oldCol] = 0;
+		board_arr[captureRow][captureCol] = 0;
+
+		// Find the index of the captured piece in the pieces array
+		int capturedPieceIndex = -1;
+		for (int i = 0; i < 24; i++) {
+			if (pieces[i].getPosition() == Vector2f(captureCol * tileSize, captureRow * tileSize)) {
+				capturedPieceIndex = i;
+				break;
+			}
+		}
+
+		if (capturedPieceIndex != -1) {
+			// Update the visual representation (remove the captured piece)
+			pieces[capturedPieceIndex].setPosition(-100, -100); // Move it off the screen
+		}
+
+		// Handle additional capturing if there are more jumps available for the same piece
+		if (player1.canPieceCaptureAgain(newRow, newCol)) {
+			// Update the game state and visual representation for the next capture
+			// You'll need to determine the new positions for this based on the direction of the jump
+		}
+
+		// Finish the move and switch players' turns
+		player1.pieceSelected = false;
+		player1.switchPlayerTurn();
+	} else {
+		// Handle regular move (without capture)
+	}
 }
 
 
