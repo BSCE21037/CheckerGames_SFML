@@ -93,72 +93,32 @@ void loadPosition(){
 	}	
 }
 
-void Kill(int oldRow, int oldCol, int newRow, int newCol){
-	if (!player1.isCaptureValid(oldRow, oldCol, newRow, newCol) ) {
-		if((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow)){
-			cout << "Capture at: " << newRow << ", " << newCol << endl;
-			// Execute the capture
-			int captureRow = (oldRow + newRow) / 2;
-			int captureCol = (oldCol + newCol) / 2;
+void Kill(int oldRow, int oldCol, int newRow, int newCol, int captureRow, int captureCol) {
+    // Update the game state
+    board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+    board_arr[oldRow][oldCol] = 0;
+    board_arr[captureRow][captureCol] = 0;
 
-			// Update the game state
-			board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-			board_arr[oldRow][oldCol] = 0;
-			board_arr[captureRow][captureCol] = 0;
+    // Find the index of the captured piece in the pieces array
+    int capturedPieceIndex = -1;
+    for (int i = 0; i < 24; i++) {
+        if (pieces[i].getPosition() == Vector2f(captureCol * tileSize, captureRow * tileSize)) {
+            capturedPieceIndex = i;
+            break;
+        }
+    }
 
-			// Find the index of the captured piece in the pieces array
-			int capturedPieceIndex = -1;
-			for (int i = 0; i < 24; i++) {
-				if (pieces[i].getPosition() == Vector2f(captureCol * tileSize, captureRow * tileSize)) {
-					capturedPieceIndex = i;
-					cout << "Captured piece index: " << capturedPieceIndex << endl;
-					break;
-				}
-			}
+    if (capturedPieceIndex != -1) {
+        // Update the visual representation (remove the captured piece)
+        pieces[capturedPieceIndex].setPosition(-100, -100); // Move it off the screen
+    }
 
-			if (capturedPieceIndex != -1) {
-				// Update the visual representation (remove the captured piece)
-				pieces[capturedPieceIndex].setPosition(-100, -100); // Move it off the screen
-				// Reset the board_arr for the captured piece's position
-				board_arr[captureRow][captureCol] = 0;
-				player1.switchPlayerTurn();
-				player1.pieceSelected = false;
-				player1.notYourTurn = 0;
-
-
-			}
-
-			// Handle additional capturing if there are more jumps available for the same piece
-			// if (player1.canPieceCaptureAgain(newRow, newCol)) {
-			// 	cout << "Can capture again" << endl;
-			// 	// Calculate the direction of the jump (up or down the board)
-			// 	int rowDirection = ((newRow - oldRow) > 0 ? 1 : -1);
-			// 	// Calculate the direction of the jump (left or right on the board)
-			// 	int colDirection = ((newCol - oldCol) > 0 ? 1 : -1);
-			// 	// Update the game state and visual representation for the next capture
-			// 	Kill(newRow, newCol, newRow + 2 * rowDirection, newCol + 2 * colDirection);
-			// }
-			// else {
-				// Finish the move and switch players' turns
-				player1.pieceSelected = false;
-				player1.switchPlayerTurn();
-			// }
-
-
-			// // Finish the move and switch players' turns
-			// player1.pieceSelected = false;
-			// player1.switchPlayerTurn();
-			}
-		} else {
-			// Handle regular move (without capture)
-			// Update the game state
-			board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-			board_arr[oldRow][oldCol] = 0;
-			// player1.pieceSelected = false;
-			// player1.switchPlayerTurn();
-
-		}
+    // Finish the move and switch players' turns
+    player1.pieceSelected = false;
+    player1.switchPlayerTurn();
 }
+
+
 
 
 //RectangleShape tile(sf::Vector2f(tileSize, tileSize));	//create tile   (global variable)
@@ -378,10 +338,10 @@ int main()
 												// board_arr[jumpRow][jumpCol] = 0;
 												// player1.pieceSelected = false;
 												cout << "Kill func call" << endl;
-												board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-												board_arr[oldRow][oldCol] = 0;
+												Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol);
+												// board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+												// board_arr[oldRow][oldCol] = 0;
 												player1.pieceSelected = false;
-												//Kill(oldRow, oldCol, newRow, newCol);
 											}
 											else{
 												// Invalid move, revert to the original position
