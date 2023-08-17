@@ -93,8 +93,9 @@ void loadPosition(){
 	}	
 }
 
-void Kill(int oldRow, int oldCol, int newRow, int newCol, int captureRow, int captureCol) {
+void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, int &captureCol, int &n){
     // Update the game state
+	pieces[n].setPosition(newCol * tileSize, newRow * tileSize);
     board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
     board_arr[oldRow][oldCol] = 0;
     board_arr[captureRow][captureCol] = 0;
@@ -338,10 +339,11 @@ int main()
 												// board_arr[jumpRow][jumpCol] = 0;
 												// player1.pieceSelected = false;
 												cout << "Kill func call" << endl;
-												Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol);
+												Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol, n);
 												// board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
 												// board_arr[oldRow][oldCol] = 0;
 												player1.pieceSelected = false;
+												player1.switchPlayerTurn();	//switch player turn
 											}
 											else{
 												// Invalid move, revert to the original position
