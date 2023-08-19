@@ -26,12 +26,6 @@ public:
 	bool pieceSelected = false;
 	int notYourTurn = 0;
 	
-	bool canPieceCaptureAgain(int newRowVar, int newColVar){
-		if(isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar + 2) || isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar - 2) || isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar + 2) || isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar - 2)){
-			return true;
-		}
-		return false;
-	}
 	void switchPlayerTurn(){
 		if(currentPlayerPiece == 1){
 			currentPlayerPiece = -1;
@@ -42,20 +36,7 @@ public:
 			opponentPiece = -1;
 		}
 	}
-	bool isCaptureValid(int oldRow, int oldCol, int newRow, int newCol) {
-		// Calculate the row and column of the tile that should be captured
-		int captureRow = (oldRow + newRow) / 2;
-		int captureCol = (oldCol + newCol) / 2;
-
-		// Check if the capturing move is diagonally adjacent
-		if (abs(newRow - oldRow) == 2 && abs(newCol - oldCol) == 2) {
-			// Check if the destination tile is empty and the capturing tile has an opponent's piece
-			if (board_arr[newRow][newCol] == 0 && board_arr[captureRow][captureCol] == opponentPiece) {
-				return true;
-			}
-		}
-		return false;
-	}
+	
 	
 };
 
@@ -91,6 +72,31 @@ void loadPosition(){
 			}
 		}
 	}	
+}
+
+bool isCaptureValid(int oldRow, int oldCol, int newRow, int newCol) {
+	// Calculate the row and column of the tile that should be captured
+	int captureRow = (oldRow + newRow) / 2;
+	int captureCol = (oldCol + newCol) / 2;
+
+	// Check if the capturing move is diagonally adjacent
+	if (abs(newRow - oldRow) == 2 && abs(newCol - oldCol) == 2) {
+		// Check if the destination tile is empty and the capturing tile has an opponent's piece
+		if (board_arr[newRow][newCol] == 0 && board_arr[captureRow][captureCol] == player1.opponentPiece) {
+			return true;
+		}
+	}
+	return false;
+}
+
+bool canPieceCaptureAgain(int newRowVar, int newColVar, int currentPiece){
+	if((isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar + 2) && currentPiece == -1)|| 
+	(isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar - 2) && currentPiece == -1) || 
+	(isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar + 2) && currentPiece == 1) || 
+	(isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar - 2)&& currentPiece == 1)){
+		return true;
+	}
+	return false;
 }
 
 void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, int &captureCol, int &n){
@@ -342,8 +348,15 @@ int main()
 												Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol, n);
 												// board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
 												// board_arr[oldRow][oldCol] = 0;
-												player1.pieceSelected = false;
-												player1.switchPlayerTurn();	//switch player turn
+												if (canPieceCaptureAgain(newRow, newCol, player1.currentPlayerPiece)) {
+													cout << "You can capture again!" << endl;
+													oldPos = newPos; // Update the old position to the new position
+													// Update other variables if needed
+												} else {
+													// Finish the move and switch players' turns
+													player1.pieceSelected = false;
+													player1.switchPlayerTurn();
+												}
 											}
 											else{
 												// Invalid move, revert to the original position
