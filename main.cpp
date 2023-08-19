@@ -351,6 +351,11 @@ int main()
 												pieces[n].setPosition(originalPos);
 											}
 										}
+										else{
+												// Invalid move, revert to the original position
+												player1.switchPlayerTurn();	//switch player turn
+												pieces[n].setPosition(originalPos);
+											}
 									}
 									else if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0){
 										 if ((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow)) {
