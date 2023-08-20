@@ -2,6 +2,83 @@
 #include <iostream>
 using namespace std;
 using namespace sf;
+#define MAX_NUMBER_OF_ITEMS 3
+
+class Menu
+{
+private:
+	int selectedItemIndex;
+	sf::Font font;
+	sf::Text menu[MAX_NUMBER_OF_ITEMS];
+
+public:
+	Menu(float width, float height)
+	{
+		if (!font.loadFromFile("arial.ttf"))
+		{
+			cout << "Error loading text" << endl;	//print error message
+		}
+
+		menu[0].setFont(font);
+		menu[0].setFillColor(sf::Color::Red);
+		menu[0].setString("Play");
+		menu[0].setPosition(sf::Vector2f(width / 2, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+
+		menu[1].setFont(font);
+		menu[1].setFillColor(sf::Color::White);
+		menu[1].setString("Options");
+		menu[1].setPosition(sf::Vector2f(width / 2, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
+
+		menu[2].setFont(font);
+		menu[2].setFillColor(sf::Color::White);
+		menu[2].setString("Exit");
+		menu[2].setPosition(sf::Vector2f(width / 2, height / (MAX_NUMBER_OF_ITEMS + 1) * 3));
+
+		selectedItemIndex = 0;
+	}
+	~Menu(){
+	}
+
+	void draw(sf::RenderWindow &window)
+	{
+		for (int i = 0; i < MAX_NUMBER_OF_ITEMS; i++)
+		{
+			window.draw(menu[i]);
+		}
+	}
+	void MoveUp()
+	{
+		if (selectedItemIndex - 1 >= 0)
+		{
+			menu[selectedItemIndex].setFillColor(sf::Color::White);
+			selectedItemIndex--;
+			menu[selectedItemIndex].setFillColor(sf::Color::Red);
+		}
+	}
+	void MoveDown()
+	{
+		if (selectedItemIndex + 1 < MAX_NUMBER_OF_ITEMS)
+		{
+			menu[selectedItemIndex].setFillColor(sf::Color::White);
+			selectedItemIndex++;
+			menu[selectedItemIndex].setFillColor(sf::Color::Red);
+		}
+	}
+	bool isMouseOverItem(const sf::Vector2i& mousePos) const
+	{
+		for (size_t i = 0; i < MAX_NUMBER_OF_ITEMS; ++i)
+		{
+			const sf::FloatRect bounds = menu[i].getGlobalBounds();
+			if (bounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+	int GetPressedItem() { return selectedItemIndex; }
+
+};
 
 Sprite pieces[24];	//array of piec
 int board_arr[8][8] = {	//board array
@@ -27,6 +104,9 @@ public:
 	int opponentKingPiece = -2;
 	bool pieceSelected = false;
 	int notYourTurn = 0;
+	int red_score = 0;
+	int black_score = 0;
+	int moves = 0;
 	
 	void switchPlayerTurn(){
 		if(currentPlayerPiece == 1 && currentKingPiece == 2){
@@ -49,7 +129,7 @@ public:
 Player player1;
 
 const int boardSize = 8;	//size of board
-const int tileSize = 59;	//size of tiles
+const int tileSize = 58;	//size of tiles
 int tileCheck = 0;			//check if tile is white or black
 int tileValue[8][8];			//value of tile
 
@@ -137,6 +217,14 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
 
     if (capturedPieceIndex != -1) {
         // Update the visual representation (remove the captured piece)
+		if(player1.currentPlayerPiece == 1){
+			player1.black_score++;
+			cout << "Black Score: " << player1.black_score << endl;
+		}
+		else{
+			player1.red_score++;
+			cout << "Red Score: " << player1.red_score << endl;
+		}
         pieces[capturedPieceIndex].setPosition(-100, -100); // Move it off the screen
     }
 
@@ -218,6 +306,11 @@ int main()
 
 	RenderWindow window(VideoMode(453, 454), "Checkers"); //create window
 
+	bool menu, game, end;	//create bools for menu, game, and end
+	menu = true;			//set menu to true
+	game = false;			//set game to false
+	end = false;			//set end to false
+
 	int fps = 60;	//set fps to 60
 	window.setFramerateLimit(fps);	//set fps limit
 
@@ -226,6 +319,12 @@ int main()
 	float speed = 0.1;		//speed of piece
 	int n = 0;
 	bool call_is_capture;
+	int king[24];		//array to store if piece is king
+	for (int i = 0; i < 24; i++)//initializing king array
+	{
+		king[i] = 0;
+	}
+	
 
 	Vector2f originalPos; // Store the original position of the piece
 	Vector2f oldPos;			//old position of piece
@@ -253,15 +352,33 @@ int main()
 	Sprite blackPiece;  							//create sprite
 	blackPiece.setTexture(black);					//set texture to sprite	
 
+	Font font;
+	if (!font.loadFromFile("arial.ttf")) {
+		cout << "Error loading font" << endl;
+	}
 
+	//Text textR;		//create text
 	for(int i = 0; i < 12; i++){		//for loop
 		pieces[i].setTexture(red);		//set texture to sprite
-		pieces[i].setScale(0.02, 0.02);	//set scale of sprite
+		pieces[i].setScale(0.022, 0.022);	//set scale of sprite
+		// textR.setFont(font);	//set font of text
+		// textR.setString("K");	//set string of text
+		// textR.setCharacterSize(20);	//set character size of text
+		// textR.setFillColor(Color::White);	//set fill color of text
+		// textR.setPosition(pieces[i].getPosition().x + 5, pieces[i].getPosition().y + 5);	//set position of text
+
 	}
 	for(int i = 12; i < 24; i++){		//for loop
 		pieces[i].setTexture(black);		//set texture to sprite
-		pieces[i].setScale(0.05, 0.05);	//set scale of sprite
+		pieces[i].setScale(0.07, 0.07);	//set scale of sprite
+		// textR.setFont(font);	//set font of text
+		// textR.setString("K");	//set string of text
+		// textR.setCharacterSize(20);	//set character size of text
+		// textR.setFillColor(Color::White);	//set fill color of text
+		// textR.setPosition(pieces[i].getPosition().x + 5, pieces[i].getPosition().y + 5);	//set position of text
 	}
+
+	Menu menU(window.getSize().x, window.getSize().y);	//create menu
 
     while (window.isOpen()) //while window is open
     {
@@ -272,104 +389,195 @@ int main()
 			switch (event.type) //switch statement for event type
 			{
 
+				case sf::Event::KeyReleased:
+					switch (event.key.code)
+					{
+					case sf::Keyboard::Up:
+						menU.MoveUp();
+						break;
+
+					case sf::Keyboard::Down:
+						menU.MoveDown();
+						break;
+
+					case sf::Keyboard::Return:
+						switch (menU.GetPressedItem())
+						{
+						case 0:
+							std::cout << "Play button has been pressed" << std::endl;
+							menu = false;
+							game = true;
+							break;
+						case 1:
+							std::cout << "Option button has been pressed" << std::endl;
+							break;
+						case 2:
+							window.close();
+							break;
+						}
+
+						break;
+					}
+
+					break;
+
 			case Event::MouseButtonPressed:    //if key is pressed    
                 if(event.mouseButton.button == Mouse::Left){    //if left mouse button is pressed
-					for(int i=0; i<24; i++){
-						if(pieces[i].getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)){	//if mouse is within bounds of sprite
-							if(pieces[i].getTexture() == &red){	//if texture is red
-								if(player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2){
-									cout << "Red piece selected" << endl;	//print message
-									player1.pieceSelected = true;	//set piece selected to true
-									movePiece = true;	//set move piece to true
-									n = i;
-									dx = event.mouseButton.x - pieces[i].getPosition().x;	//set delta x
-									dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
-									oldPos = pieces[i].getPosition();					// Store the original position before moving
-									originalPos = pieces[n].getPosition();	// Store the original position before moving
-									player1.switchPlayerTurn();	//switch player turn
-								}
-								else{
-									cout << "It is Black Player turn" << endl;	//print message
-									player1.notYourTurn = 1;	//set not your turn to 1
-								}
+					if(menu == true){	//if menu is true
+						 // Get mouse position
+						sf::Vector2i mousePos = sf::Mouse::getPosition(window);
 
+						// Check if the mouse position is within the bounds of menu items
+						if (menU.isMouseOverItem(mousePos))
+						{
+							// Get mouse position
+							int selectedItem = menU.GetPressedItem();
+							switch (selectedItem)
+							{
+							case 0:
+								std::cout << "Play button has been pressed" << std::endl;
+								menu = false;
+								game = true;
+								break;
+							case 1:
+								std::cout << "Option button has been pressed" << std::endl;
+								break;
+							case 2:
+								window.close();
+								break;
 							}
-							else if(pieces[i].getTexture() == &black){	//if texture is black
-								if(player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2){
-									cout << "Black piece selected" << endl;	//print message
-									player1.pieceSelected = true;	//set piece selected to true
-									movePiece = true;	//set move piece to true
-									n = i;
-									dx = event.mouseButton.x - pieces[i].getPosition().x;	//set delta x
-									dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
-									oldPos = pieces[i].getPosition();					// Store the original position before moving
-									originalPos = pieces[n].getPosition();	// Store the original position before moving
-									player1.switchPlayerTurn();	//switch player turn
-								}
-								else{
-									cout << "It is Red Player turn" << endl;	//print message
-									player1.notYourTurn = 1;	//set not your turn to 1
-								}
-							}
-							else{
-								cout << "Select a piece" << endl;	//print message
-							}
-							
 						}
 					}
-                    cout << "mouse x: " << mousePos.x << endl;  //print mouse x position
-                    cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
-                }
+					else if(game == true){
+						for(int i=0; i<24; i++){
+							if(pieces[i].getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)){	//if mouse is within bounds of sprite
+								if(pieces[i].getTexture() == &red){	//if texture is red
+									if(player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2){
+										cout << "Red piece selected" << endl;	//print message
+										player1.pieceSelected = true;	//set piece selected to true
+										movePiece = true;	//set move piece to true
+										n = i;
+										dx = event.mouseButton.x - pieces[i].getPosition().x;	//set delta x
+										dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
+										oldPos = pieces[i].getPosition();					// Store the original position before moving
+										originalPos = pieces[n].getPosition();	// Store the original position before moving
+										player1.switchPlayerTurn();	//switch player turn
+									}
+									else{
+										cout << "It is Black Player turn" << endl;	//print message
+										player1.notYourTurn = 1;	//set not your turn to 1
+									}
+
+								}
+								else if(pieces[i].getTexture() == &black){	//if texture is black
+									if(player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2){
+										cout << "Black piece selected" << endl;	//print message
+										player1.pieceSelected = true;	//set piece selected to true
+										movePiece = true;	//set move piece to true
+										n = i;
+										dx = event.mouseButton.x - pieces[i].getPosition().x;	//set delta x
+										dy = event.mouseButton.y - pieces[i].getPosition().y;	//set delta y
+										oldPos = pieces[i].getPosition();					// Store the original position before moving
+										originalPos = pieces[n].getPosition();	// Store the original position before moving
+										player1.switchPlayerTurn();	//switch player turn
+									}
+									else{
+										cout << "It is Red Player turn" << endl;	//print message
+										player1.notYourTurn = 1;	//set not your turn to 1
+									}
+								}
+								else{
+									cout << "Select a piece" << endl;	//print message
+								}
+								
+							}
+						}
+						cout << "mouse x: " << mousePos.x << endl;  //print mouse x position
+						cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
+					}
+				}
                 break;        //break
             
             case Event::MouseButtonReleased:	//if key is released
 				
 				if (event.mouseButton.button == Mouse::Left) {
-					// Get the center position of the dropped piece
-					Vector2f p = pieces[n].getPosition() + Vector2f(tileSize / 2, tileSize / 2);
+					if(menu == true){}
+					else if(game == true){
+						// Get the center position of the dropped piece
+						Vector2f p = pieces[n].getPosition() + Vector2f(tileSize / 2, tileSize / 2);
 
-					// Convert pixel coordinates to grid coordinates
-					int newRow = static_cast<int>(p.y / tileSize);
-					int newCol = static_cast<int>(p.x / tileSize);
+						// Convert pixel coordinates to grid coordinates
+						int newRow = static_cast<int>(p.y / tileSize);
+						int newCol = static_cast<int>(p.x / tileSize);
 
-					int oldRow = static_cast<int>(originalPos.y / tileSize);
-					int oldCol = static_cast<int>(originalPos.x / tileSize);
+						int oldRow = static_cast<int>(originalPos.y / tileSize);
+						int oldCol = static_cast<int>(originalPos.x / tileSize);
 
-					// Calculate the new position based on grid coordinates
-					Vector2f newPos = Vector2f(newCol * tileSize, newRow * tileSize);
+						// Calculate the new position based on grid coordinates
+						Vector2f newPos = Vector2f(newCol * tileSize, newRow * tileSize);
 
-					if (player1.pieceSelected == true) {
-					
-						movePiece = false;	//set move piece to false
+						if (player1.pieceSelected == true) {
+						
+							movePiece = false;	//set move piece to false
 
-						if(player1.notYourTurn == 1){
-							player1.notYourTurn = 0;
-						}
-						// Check if the move is valid and within bounds
-						if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
-							board_arr[newRow][newCol] != -9) {
-								// Valid move
-								if(board_arr[newRow][newCol] == 0){
-									if (abs(newRow - oldRow) == 2 && abs(newCol - oldCol) == 2) {
-										if (((player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2) && newRow > oldRow) || ((player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2) && newRow < oldRow) || board_arr[oldRow][oldCol] == 2 || board_arr[oldRow][oldCol] == -2) {
-											cout << "Jump Check" << endl;
-											// Check if the move is a jump
-											int jumpRow = (newRow + oldRow) / 2;
-											int jumpCol = (newCol + oldCol) / 2;
+							if(player1.notYourTurn == 1){
+								player1.notYourTurn = 0;
+							}
+							// Check if the move is valid and within bounds
+							if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
+								board_arr[newRow][newCol] != -9) {
+									// Valid move
+									if(board_arr[newRow][newCol] == 0){
+										if (abs(newRow - oldRow) == 2 && abs(newCol - oldCol) == 2) {
+											if (((player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2) && newRow > oldRow) || ((player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2) && newRow < oldRow) || board_arr[oldRow][oldCol] == 2 || board_arr[oldRow][oldCol] == -2) {
+												cout << "Jump Check" << endl;
+												// Check if the move is a jump
+												int jumpRow = (newRow + oldRow) / 2;
+												int jumpCol = (newCol + oldCol) / 2;
 
-											if (board_arr[jumpRow][jumpCol] != 0) {
-												// Valid jump
-												cout << "Kill func call" << endl;
-												Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol, n);
-												if (canPieceCaptureAgain(newRow, newCol, player1.currentPlayerPiece, board_arr[newRow][newCol])) {
-													cout << "You can capture again!" << endl;
-													oldPos = newPos; // Update the old position to the new position
-													
-												} else {
-													// Finish the move and switch players' turns
-													player1.pieceSelected = false;
-													player1.switchPlayerTurn();
+												if (board_arr[jumpRow][jumpCol] != 0) {
+													// Valid jump
+													cout << "Kill func call" << endl;
+													Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol, n);
+													if (canPieceCaptureAgain(newRow, newCol, player1.currentPlayerPiece, board_arr[newRow][newCol])) {
+														cout << "You can capture again!" << endl;
+														oldPos = newPos; // Update the old position to the new position
+														
+													} else {
+														// Finish the move and switch players' turns
+														player1.pieceSelected = false;
+														player1.switchPlayerTurn();
+													}
+													cout << "Checking king promotion conditions..." << endl;
+													if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
+														(player1.currentPlayerPiece == -1 && newRow == 0)) {
+															// King me
+															player1.currentPlayerPiece = player1.currentPlayerPiece * 2;
+															board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
+															cout << "King me!" << endl;
+															king[n] = 1;//set king to 1
+													}
+													else{
+														cout << "Not king me!" << endl;
+													}
 												}
+												else{
+													// Invalid move, revert to the original position
+													player1.switchPlayerTurn();	//switch player turn
+													pieces[n].setPosition(originalPos);
+												}
+											}
+											else{
+													// Invalid move, revert to the original position
+													player1.switchPlayerTurn();	//switch player turn
+													pieces[n].setPosition(originalPos);
+												}
+										}
+										else if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0){
+											if ((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow) || (board_arr[oldRow][oldCol] == 2 || board_arr[oldRow][oldCol] == -2)) {
+												pieces[n].setPosition(newPos);
+												board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
+												board_arr[oldRow][oldCol] = 0;
 												cout << "Checking king promotion conditions..." << endl;
 												if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
 													(player1.currentPlayerPiece == -1 && newRow == 0)) {
@@ -377,42 +585,20 @@ int main()
 														player1.currentPlayerPiece = player1.currentPlayerPiece * 2;
 														board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
 														cout << "King me!" << endl;
+														king[n] = 1;//set king to 1
+														//player1.switchPlayerTurn();	//switch player turn
 												}
 												else{
 													cout << "Not king me!" << endl;
 												}
+												player1.pieceSelected = false;
+												
 											}
 											else{
 												// Invalid move, revert to the original position
 												player1.switchPlayerTurn();	//switch player turn
 												pieces[n].setPosition(originalPos);
 											}
-										}
-										else{
-												// Invalid move, revert to the original position
-												player1.switchPlayerTurn();	//switch player turn
-												pieces[n].setPosition(originalPos);
-											}
-									}
-									else if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0){
-										 if ((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow) || (board_arr[oldRow][oldCol] == 2 || board_arr[oldRow][oldCol] == -2)) {
-											pieces[n].setPosition(newPos);
-											board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-											board_arr[oldRow][oldCol] = 0;
-											cout << "Checking king promotion conditions..." << endl;
-											if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
-												(player1.currentPlayerPiece == -1 && newRow == 0)) {
-													// King me
-													player1.currentPlayerPiece = player1.currentPlayerPiece * 2;
-													board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
-													cout << "King me!" << endl;
-													//player1.switchPlayerTurn();	//switch player turn
-											}
-											else{
-												cout << "Not king me!" << endl;
-											}
-											player1.pieceSelected = false;
-											
 										}
 										else{
 											// Invalid move, revert to the original position
@@ -420,47 +606,45 @@ int main()
 											pieces[n].setPosition(originalPos);
 										}
 									}
-									else{
+									else if(board_arr[newRow][newCol] == 1){
 										// Invalid move, revert to the original position
 										player1.switchPlayerTurn();	//switch player turn
 										pieces[n].setPosition(originalPos);
 									}
-								}
-								else if(board_arr[newRow][newCol] == 1){
-									// Invalid move, revert to the original position
-									player1.switchPlayerTurn();	//switch player turn
-									pieces[n].setPosition(originalPos);
-								}
-								else if(board_arr[newRow][newCol] == -1){
-									// Invalid move, revert to the original position
-									player1.switchPlayerTurn();	//switch player turn
-									pieces[n].setPosition(originalPos);
-								}
-								else if(board_arr[newRow][newCol] == -9){
-									// Invalid move, revert to the original position
-									player1.switchPlayerTurn();	//switch player turn
-									pieces[n].setPosition(originalPos);
-								}
+									else if(board_arr[newRow][newCol] == -1){
+										// Invalid move, revert to the original position
+										player1.switchPlayerTurn();	//switch player turn
+										pieces[n].setPosition(originalPos);
+									}
+									else if(board_arr[newRow][newCol] == -9){
+										// Invalid move, revert to the original position
+										player1.switchPlayerTurn();	//switch player turn
+										pieces[n].setPosition(originalPos);
+									}
 
-						} else if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
-							board_arr[newRow][newCol] == -9) {
-							// Invalid move, revert to the original position
-							player1.switchPlayerTurn();	//switch player turn
-							pieces[n].setPosition(originalPos);
-						}
-
-						cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
-						cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
-						// print whole board values
-						for(int i = 0; i < boardSize; i++){
-							for(int j = 0; j < boardSize; j++){
-								cout << board_arr[i][j] << " ";
+							} else if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
+								board_arr[newRow][newCol] == -9) {
+								// Invalid move, revert to the original position
+								player1.switchPlayerTurn();	//switch player turn
+								pieces[n].setPosition(originalPos);
 							}
-							cout << endl;
+
+							cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
+							cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
+							// print whole board values
+							for(int i = 0; i < boardSize; i++){
+								for(int j = 0; j < boardSize; j++){
+									cout << board_arr[i][j] << " ";
+								}
+								cout << endl;
+							}
 						}
 					}
 				}else{
-					cout << "Player , please select a piece to move!" << endl;
+					if(menu == true){}
+					else if(game == true){
+						cout << "Player , please select a piece to move!" << endl;
+					}
 				}
 				break;	//break
 
@@ -475,9 +659,25 @@ int main()
         }
         window.clear(); //clear window
         //drawChessBoard(window);        //draw chess board
-		window.draw(boardSprite);	//draw red piece
-		for(int i = 0; i < 24; i++){	//for loop
-			window.draw(pieces[i]);		//draw pieces
+		if(menu == true){
+			menU.draw(window);
+		}
+		else if(game == true){
+			window.draw(boardSprite);	//draw red piece
+			for (int i = 0; i < 24; i++) {
+			if (king[i] == 1) {
+				// Calculate the position for the "K" text relative to the king piece
+				Vector2f kingPosition = pieces[i].getPosition();
+				Text textR("K", font, 15); // Adjust font size as needed
+				textR.setPosition(kingPosition.x + 5, kingPosition.y + 5); // Adjust position as needed
+
+				// Draw the king piece, then the associated text
+				window.draw(pieces[i]);
+				window.draw(textR);
+			} else {
+				window.draw(pieces[i]);
+			}
+			}
 		}
         window.display();    //display window
     }
