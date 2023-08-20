@@ -23,17 +23,23 @@ class Player{
 public:
 	int currentPlayerPiece = 1;
 	int opponentPiece = -1;
+	int currentKingPiece = 2;
+	int opponentKingPiece = -2;
 	bool pieceSelected = false;
 	int notYourTurn = 0;
 	
 	void switchPlayerTurn(){
-		if(currentPlayerPiece == 1){
+		if(currentPlayerPiece == 1 && currentKingPiece == 2){
 			currentPlayerPiece = -1;
+			currentKingPiece = -2;
 			opponentPiece = 1;
+			opponentKingPiece = 2;
 		}
 		else{
 			currentPlayerPiece = 1;
+			currentKingPiece = 2;
 			opponentPiece = -1;
+			opponentKingPiece = -2;
 		}
 	}
 	
@@ -70,6 +76,12 @@ void loadPosition(){
 				pieces[k].setPosition(j * tileSize, i * tileSize);
 				k++;
 			}
+			// else if (n == 2 || n == -2) { // King pieces
+            //     int textureIndex = (n == 2) ? 2 : -2; // Adjust texture index for kings
+            //     pieces[k].setTextureRect(IntRect(0.7 * textureIndex, 0, 0.7, 0.7)); // Set texture rect for kings
+            //     pieces[k].setPosition(j * tileSize, i * tileSize);
+            //     k++;
+            // }
 		}
 	}	
 }
@@ -89,7 +101,15 @@ bool isCaptureValid(int oldRow, int oldCol, int newRow, int newCol) {
 	return false;
 }
 
-bool canPieceCaptureAgain(int newRowVar, int newColVar, int currentPiece){
+bool canPieceCaptureAgain(int newRowVar, int newColVar, int currentPiece, int k){
+	if (k == 2 || k == -2) {
+        if (isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar + 2) ||
+            isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar - 2) ||
+            isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar + 2) ||
+            isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar - 2)) {
+            return true;
+        }
+    }
 	if((isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar + 2) && currentPiece == -1)|| 
 	(isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar - 2) && currentPiece == -1) || 
 	(isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar + 2) && currentPiece == 1) || 
@@ -257,7 +277,7 @@ int main()
 					for(int i=0; i<24; i++){
 						if(pieces[i].getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)){	//if mouse is within bounds of sprite
 							if(pieces[i].getTexture() == &red){	//if texture is red
-								if(player1.currentPlayerPiece == -1){
+								if(player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2){
 									cout << "Red piece selected" << endl;	//print message
 									player1.pieceSelected = true;	//set piece selected to true
 									movePiece = true;	//set move piece to true
@@ -275,7 +295,7 @@ int main()
 
 							}
 							else if(pieces[i].getTexture() == &black){	//if texture is black
-								if(player1.currentPlayerPiece == 1){
+								if(player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2){
 									cout << "Black piece selected" << endl;	//print message
 									player1.pieceSelected = true;	//set piece selected to true
 									movePiece = true;	//set move piece to true
@@ -331,7 +351,7 @@ int main()
 								// Valid move
 								if(board_arr[newRow][newCol] == 0){
 									if (abs(newRow - oldRow) == 2 && abs(newCol - oldCol) == 2) {
-										if ((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow)){
+										if (((player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2) && newRow > oldRow) || ((player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2) && newRow < oldRow) || board_arr[oldRow][oldCol] == 2 || board_arr[oldRow][oldCol] == -2) {
 											cout << "Jump Check" << endl;
 											// Check if the move is a jump
 											int jumpRow = (newRow + oldRow) / 2;
@@ -339,23 +359,27 @@ int main()
 
 											if (board_arr[jumpRow][jumpCol] != 0) {
 												// Valid jump
-												// pieces[n].setPosition(newPos);
-												// board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-												// board_arr[oldRow][oldCol] = 0;
-												// board_arr[jumpRow][jumpCol] = 0;
-												// player1.pieceSelected = false;
 												cout << "Kill func call" << endl;
 												Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol, n);
-												// board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
-												// board_arr[oldRow][oldCol] = 0;
-												if (canPieceCaptureAgain(newRow, newCol, player1.currentPlayerPiece)) {
+												if (canPieceCaptureAgain(newRow, newCol, player1.currentPlayerPiece, board_arr[newRow][newCol])) {
 													cout << "You can capture again!" << endl;
 													oldPos = newPos; // Update the old position to the new position
-													// Update other variables if needed
+													
 												} else {
 													// Finish the move and switch players' turns
 													player1.pieceSelected = false;
 													player1.switchPlayerTurn();
+												}
+												cout << "Checking king promotion conditions..." << endl;
+												if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
+													(player1.currentPlayerPiece == -1 && newRow == 0)) {
+														// King me
+														player1.currentPlayerPiece = player1.currentPlayerPiece * 2;
+														board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
+														cout << "King me!" << endl;
+												}
+												else{
+													cout << "Not king me!" << endl;
 												}
 											}
 											else{
@@ -371,11 +395,24 @@ int main()
 											}
 									}
 									else if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0){
-										 if ((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow)) {
+										 if ((player1.currentPlayerPiece == 1 && newRow > oldRow) || (player1.currentPlayerPiece == -1 && newRow < oldRow) || (board_arr[oldRow][oldCol] == 2 || board_arr[oldRow][oldCol] == -2)) {
 											pieces[n].setPosition(newPos);
 											board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
 											board_arr[oldRow][oldCol] = 0;
+											cout << "Checking king promotion conditions..." << endl;
+											if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
+												(player1.currentPlayerPiece == -1 && newRow == 0)) {
+													// King me
+													player1.currentPlayerPiece = player1.currentPlayerPiece * 2;
+													board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
+													cout << "King me!" << endl;
+													//player1.switchPlayerTurn();	//switch player turn
+											}
+											else{
+												cout << "Not king me!" << endl;
+											}
 											player1.pieceSelected = false;
+											
 										}
 										else{
 											// Invalid move, revert to the original position
