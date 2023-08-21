@@ -75,6 +75,7 @@ public:
 
 };
 
+
 Sprite pieces[24];	//array of piec
 int board_arr[8][8] = {	//board array
 	-9, -1, -9,-1, -9,-1, -9,-1,	// --------
@@ -101,6 +102,8 @@ public:
 	int notYourTurn = 0;
 	int red_score = 0;
 	int black_score = 0;
+	int red_left = 12;
+	int black_left = 12;
 	int moves = 0;
 	
 	void switchPlayerTurn(){
@@ -200,7 +203,7 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
     board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
     board_arr[oldRow][oldCol] = 0;
     board_arr[captureRow][captureCol] = 0;
-
+	player1.moves = 0;
     // Find the index of the captured piece in the pieces array
     int capturedPieceIndex = -1;
     for (int i = 0; i < 24; i++) {
@@ -213,12 +216,16 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
     if (capturedPieceIndex != -1) {
         // Update the visual representation (remove the captured piece)
 		if(player1.currentPlayerPiece == 1){
-			player1.black_score++;
-			cout << "Black Score: " << player1.black_score << endl;
-		}
-		else{
 			player1.red_score++;
 			cout << "Red Score: " << player1.red_score << endl;
+			player1.black_left--;
+			cout << "Black Left: " << player1.black_left << endl;
+		}
+		else{
+			player1.black_score++;
+			cout << "Black Score: " << player1.black_score << endl;
+			player1.red_left--;
+			cout << "Red Left: " << player1.red_left << endl;
 		}
         pieces[capturedPieceIndex].setPosition(-100, -100); // Move it off the screen
     }
@@ -228,6 +235,63 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
     player1.switchPlayerTurn();
 }
 
+bool isValidMoveAvailable(Player& player, int pieceIndex)
+{
+    // Get the row and column of the piece
+    int row = static_cast<int>(pieces[pieceIndex].getPosition().y / tileSize);
+    int col = static_cast<int>(pieces[pieceIndex].getPosition().x / tileSize);
+
+    // Check possible moves for regular pieces
+    if (abs(player.currentPlayerPiece) == 1)
+    {
+        // Check diagonally forward left
+        if (row - 1 >= 0 && col - 1 >= 0 &&
+            board_arr[row - 1][col - 1] == 0)
+        {
+            return true;
+        }
+        
+        // Check diagonally forward right
+        if (row - 1 >= 0 && col + 1 < boardSize &&
+            board_arr[row - 1][col + 1] == 0)
+        {
+            return true;
+        }
+    }
+    // Check possible moves for king pieces
+    else if (abs(player.currentPlayerPiece) == 2)
+    {
+        // Check diagonally forward left
+        if (row - 1 >= 0 && col - 1 >= 0 &&
+            board_arr[row - 1][col - 1] == 0)
+        {
+            return true;
+        }
+        
+        // Check diagonally forward right
+        if (row - 1 >= 0 && col + 1 < boardSize &&
+            board_arr[row - 1][col + 1] == 0)
+        {
+            return true;
+        }
+
+        // Check diagonally backward left
+        if (row + 1 < boardSize && col - 1 >= 0 &&
+            board_arr[row + 1][col - 1] == 0)
+        {
+            return true;
+        }
+        
+        // Check diagonally backward right
+        if (row + 1 < boardSize && col + 1 < boardSize &&
+            board_arr[row + 1][col + 1] == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
 
 
 
@@ -301,10 +365,10 @@ int main()
 
 	RenderWindow window(VideoMode(453, 454), "2 Player Checker Game", Style::Titlebar | Style::Close); //create window
 
-	bool menu, game, end;	//create bools for menu, game, and end
+	bool menu, game, result;	//create bools for menu, game, and end
 	menu = true;			//set menu to true
 	game = false;			//set game to false
-	end = false;			//set end to false
+	result = false;			//set end to false
 
 	int fps = 60;	//set fps to 60
 	window.setFramerateLimit(fps);	//set fps limit
@@ -500,6 +564,9 @@ int main()
 						cout << "mouse x: " << mousePos.x << endl;  //print mouse x position
 						cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
 					}
+					else if(result == true){
+						
+					}
 				}
                 break;        //break
             
@@ -583,6 +650,7 @@ int main()
 												pieces[n].setPosition(newPos);
 												board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
 												board_arr[oldRow][oldCol] = 0;
+												player1.moves++;
 												cout << "Checking king promotion conditions..." << endl;
 												if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
 													(player1.currentPlayerPiece == -1 && newRow == 0)) {
@@ -633,6 +701,7 @@ int main()
 								player1.switchPlayerTurn();	//switch player turn
 								pieces[n].setPosition(originalPos);
 							}
+							
 
 							cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
 							cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
@@ -643,7 +712,32 @@ int main()
 								}
 								cout << endl;
 							}
+							if(player1.moves == 32 || (player1.black_left<=1 && player1.red_left>2) || (player1.black_left<=1 && player1.red_left>2)){
+							cout << "Game over!" << endl;
+								if(player1.moves == 32){
+									if(player1.black_score > player1.red_score){
+										cout << "Player 1 wins!" << endl;
+									}
+									else if(player1.black_score < player1.red_score){
+										cout << "Player 2 wins!" << endl;
+									}
+									else if(player1.black_score == player1.red_score){
+										cout << "It's a draw!" << endl;
+									}
+								}
+								else if(player1.black_left<=2 && player1.red_left>2){
+									cout << "Player 2 wins!" << endl;
+								}
+								else if(player1.black_left>2 && player1.red_left<=2){
+									cout << "Player 1 wins!" << endl;
+								}
+							}
+
 						}
+						
+					}
+					else if(result  == true){
+
 					}
 				}else{
 					if(menu == true){}
@@ -684,6 +778,9 @@ int main()
 				window.draw(pieces[i]);
 			}
 			}
+		}
+		else if(result == true){
+
 		}
         window.display();    //display window
     }
