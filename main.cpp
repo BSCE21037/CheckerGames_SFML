@@ -2,7 +2,7 @@
 #include <iostream>
 using namespace std;
 using namespace sf;
-#define MAX_NUMBER_OF_ITEMS 3
+#define MAX_NUMBER_OF_ITEMS 2
 
 class Menu
 {
@@ -26,13 +26,8 @@ public:
 
 		menu[1].setFont(font);
 		menu[1].setFillColor(sf::Color::White);
-		menu[1].setString("Options");
+		menu[1].setString("Exit");
 		menu[1].setPosition(sf::Vector2f(width / 2, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-
-		menu[2].setFont(font);
-		menu[2].setFillColor(sf::Color::White);
-		menu[2].setString("Exit");
-		menu[2].setPosition(sf::Vector2f(width / 2, height / (MAX_NUMBER_OF_ITEMS + 1) * 3));
 
 		selectedItemIndex = 0;
 	}
@@ -304,7 +299,7 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
 int main()
 {
 
-	RenderWindow window(VideoMode(453, 454), "Checkers"); //create window
+	RenderWindow window(VideoMode(453, 454), "2 Player Checker Game", Style::Titlebar | Style::Close); //create window
 
 	bool menu, game, end;	//create bools for menu, game, and end
 	menu = true;			//set menu to true
@@ -380,6 +375,8 @@ int main()
 
 	Menu menU(window.getSize().x, window.getSize().y);	//create menu
 
+	sf::Vector2i lastMousePos; // To keep track of the last mouse position
+
     while (window.isOpen()) //while window is open
     {
 		Vector2i mousePos = Mouse::getPosition(window); //get mouse position
@@ -409,9 +406,6 @@ int main()
 							game = true;
 							break;
 						case 1:
-							std::cout << "Option button has been pressed" << std::endl;
-							break;
-						case 2:
 							window.close();
 							break;
 						}
@@ -420,6 +414,20 @@ int main()
 					}
 
 					break;
+
+				case Event::MouseMoved:	//if mouse is moved
+                
+					if (mousePos.y > lastMousePos.y)
+					{
+						menU.MoveDown();
+					}
+					else if (mousePos.y < lastMousePos.y)
+					{
+						menU.MoveUp();
+					}
+                
+                	lastMousePos = mousePos; // Update the last mouse position
+				break;
 
 			case Event::MouseButtonPressed:    //if key is pressed    
                 if(event.mouseButton.button == Mouse::Left){    //if left mouse button is pressed
@@ -440,9 +448,6 @@ int main()
 								game = true;
 								break;
 							case 1:
-								std::cout << "Option button has been pressed" << std::endl;
-								break;
-							case 2:
 								window.close();
 								break;
 							}
@@ -660,6 +665,7 @@ int main()
         window.clear(); //clear window
         //drawChessBoard(window);        //draw chess board
 		if(menu == true){
+			window.draw(boardSprite);	//draw menu
 			menU.draw(window);
 		}
 		else if(game == true){
