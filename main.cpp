@@ -8,8 +8,8 @@ class Menu
 {
 private:
 	int selectedItemIndex;
-	sf::Font font;
-	sf::Text menu[MAX_NUMBER_OF_ITEMS];
+	Font font;
+	Text menu[MAX_NUMBER_OF_ITEMS];
 
 public:
 	Menu(float width, float height)
@@ -125,6 +125,131 @@ public:
 };
 
 Player player1;
+
+class GameOver
+{
+private:
+	Font f;
+	Text gameOver[MAX_NUMBER_OF_ITEMS];
+	float width, height;
+	int dive = 8;
+
+public:
+	GameOver(float width, float height)
+	{
+		this->width = width;
+		this->height = height;
+	}
+
+	void setFont(int opt, int draw)
+	{
+		if (!f.loadFromFile("arial.ttf"))
+		{
+			cout << "Error loading text" << endl;	//print error message
+		}
+
+		if(opt == 1 && draw != 0){
+			if(draw == 1){
+				gameOver[0].setFont(f);
+				gameOver[0].setScale(0.8, 0.8);
+				gameOver[0].setFillColor(sf::Color::Black);
+				gameOver[0].setString("Player 1 Wins(Greater Score)");
+				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+
+				gameOver[1].setFont(f);
+				gameOver[0].setScale(0.8, 0.8);
+				gameOver[1].setFillColor(sf::Color::White);
+				gameOver[1].setString("Return to Menu");
+				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
+			}
+			else if(draw == 2){
+				gameOver[0].setFont(f);
+				gameOver[0].setScale(0.8, 0.8);
+				gameOver[0].setFillColor(sf::Color::Red);
+				gameOver[0].setString("Player 2 Wins(Greater Score)");
+				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+
+				gameOver[1].setFont(f);
+				gameOver[0].setScale(0.8, 0.8);
+				gameOver[1].setFillColor(sf::Color::White);
+				gameOver[1].setString("Return to Menu");
+				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
+			}
+			else if(draw == 3){
+				gameOver[0].setFont(f);
+				gameOver[0].setScale(0.8, 0.8);
+				gameOver[0].setFillColor(sf::Color::Blue);
+				gameOver[0].setString("Its a Draw");
+				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+
+				gameOver[1].setFont(f);
+				gameOver[0].setScale(0.8, 0.8);
+				gameOver[1].setFillColor(sf::Color::White);
+				gameOver[1].setString("Return to Menu");
+				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
+			}
+		}
+		else if(opt == 2 && draw == 0){
+			gameOver[0].setFont(f);
+			gameOver[0].setScale(0.8, 0.8);
+			gameOver[0].setFillColor(sf::Color::Red);
+			gameOver[0].setString("Player 2 Wins(Dominates the Board)");
+			gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+
+			gameOver[1].setFont(f);
+			gameOver[0].setScale(0.8, 0.8);
+			gameOver[1].setFillColor(sf::Color::White);
+			gameOver[1].setString("Return to Menu");
+			gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
+		}
+		else if(opt == 3 && draw == 0){
+			gameOver[0].setFont(f);
+			gameOver[0].setScale(0.8, 0.8);
+			gameOver[0].setFillColor(sf::Color::Black);
+			gameOver[0].setString("Player 1 Wins(Dominates the Board)");
+			gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
+
+			gameOver[1].setFont(f);
+			gameOver[0].setScale(0.8, 0.8);
+			gameOver[1].setFillColor(sf::Color::White);
+			gameOver[1].setString("Return to Menu");
+			gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
+
+		}
+
+	}
+	
+	void setWidth(float w)
+	{
+		width = w;
+	}
+	void setHeight(float h)
+	{
+		height = h;
+	}
+
+
+	void draw(sf::RenderWindow &window)
+	{
+		for (int i = 0; i < MAX_NUMBER_OF_ITEMS; i++)
+		{
+			window.draw(gameOver[i]);
+		}
+	}
+	bool isMouseOverItem(const sf::Vector2i& mousePos) const
+	{
+		for (size_t i = 0; i < MAX_NUMBER_OF_ITEMS; ++i)
+		{
+			const sf::FloatRect bounds = gameOver[i].getGlobalBounds();
+			if (bounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
+			{
+				return true;
+			}
+		}
+		return false;
+	}
+
+};
 
 const int boardSize = 8;	//size of board
 const int tileSize = 58;	//size of tiles
@@ -439,6 +564,8 @@ int main()
 
 	Menu menU(window.getSize().x, window.getSize().y);	//create menu
 
+	GameOver gameover(window.getSize().x, window.getSize().y);	//create game over
+
 	sf::Vector2i lastMousePos; // To keep track of the last mouse position
 
     while (window.isOpen()) //while window is open
@@ -565,7 +692,26 @@ int main()
 						cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
 					}
 					else if(result == true){
-						
+						// Get mouse position
+						Vector2i mousePos = Mouse::getPosition(window);
+
+						// Check if the mouse position is within the bounds of menu items
+						if (menU.isMouseOverItem(mousePos))
+						{
+							// Get mouse position
+							int selectedItem = menU.GetPressedItem();
+							switch (selectedItem)
+							{
+							case 0:
+								std::cout << "Play button has been pressed" << std::endl;
+								menu = false;
+								game = true;
+								break;
+							case 1:
+								window.close();
+								break;
+							}
+						}
 					}
 				}
                 break;        //break
@@ -712,33 +858,66 @@ int main()
 								}
 								cout << endl;
 							}
-							if(player1.moves == 32 || (player1.black_left<=1 && player1.red_left>2) || (player1.black_left<=1 && player1.red_left>2)){
-							cout << "Game over!" << endl;
+							if(player1.moves == 32 || (player1.black_left<=1 && player1.red_left>2) || (player1.red_left<=1 && player1.black_left>2)){
+								cout << "Game over!" << endl;
 								if(player1.moves == 32){
 									if(player1.black_score > player1.red_score){
 										cout << "Player 1 wins!" << endl;
+										gameover.setFont(1,1);
 									}
 									else if(player1.black_score < player1.red_score){
 										cout << "Player 2 wins!" << endl;
+										gameover.setFont(1,2);
 									}
 									else if(player1.black_score == player1.red_score){
 										cout << "It's a draw!" << endl;
+										gameover.setFont(1,3);
 									}
+									result = true;
+									menu = false;
+									game = false;
 								}
-								else if(player1.black_left<=2 && player1.red_left>2){
+								else if(player1.black_left<=1 && player1.red_left>2){
 									cout << "Player 2 wins!" << endl;
+									gameover.setFont(2,0);
+									result = true;
+									menu = false;
+									game = false;
 								}
-								else if(player1.black_left>2 && player1.red_left<=2){
+								else if(player1.black_left>2 && player1.red_left<=1){
 									cout << "Player 1 wins!" << endl;
+									gameover.setFont(3,0);
+									result = true;
+									menu = false;
+									game = false;
+								}
+							}
+							else if((player1.black_left<=1 && player1.red_left<=2) || (player1.red_left<=1 && player1.black_left<=2)){
+								if(player1.black_left == 0){
+									cout << "Player 2 wins!" << endl;
+									gameover.setFont(2,0);
+									result = true;
+									menu = false;
+									game = false;
+								}
+								else if(player1.red_left == 0){
+									cout << "Player 1 wins!" << endl;
+									gameover.setFont(3,0);
+									result = true;
+									menu = false;
+									game = false;
+								}
+								else{
+									cout << "Game Continues!" << endl;
 								}
 							}
 
 						}
 						
 					}
-					else if(result  == true){
-
-					}
+					// else if(result  == true){
+						
+					// }
 				}else{
 					if(menu == true){}
 					else if(game == true){
@@ -780,7 +959,8 @@ int main()
 			}
 		}
 		else if(result == true){
-
+			window.draw(boardSprite);	//draw menu
+			gameover.draw(window);
 		}
         window.display();    //display window
     }
