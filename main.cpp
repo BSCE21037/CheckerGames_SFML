@@ -77,6 +77,19 @@ public:
 
 
 Sprite pieces[24];	//array of piec
+int orignal_board_arr[8][8] = {	//board array
+	-9, -1, -9,-1, -9,-1, -9,-1,	// --------
+	-1, -9,-1, -9,-1, -9,-1, -9,// player 1
+	-9, -1, -9,-1, -9,-1, -9,-1,// --------
+
+	0, -9, 0, -9, 0, -9, 0, -9,
+	-9, 0, -9, 0, -9, 0, -9, 0,
+
+	1, -9, 1, -9, 1, -9, 1, -9,// --------
+	-9, 1, -9, 1, -9, 1, -9, 1, // player 2
+	1, -9, 1, -9, 1, -9, 1, -9// --------
+	
+};
 int board_arr[8][8] = {	//board array
 	-9, -1, -9,-1, -9,-1, -9,-1,	// --------
 	-1, -9,-1, -9,-1, -9,-1, -9,// player 1
@@ -105,6 +118,30 @@ public:
 	int red_left = 12;
 	int black_left = 12;
 	int moves = 0;
+
+	void resetPlayer(){
+		//reset all values back
+		currentPlayerPiece = 1;
+		opponentPiece = -1;
+		currentKingPiece = 2;
+		opponentKingPiece = -2;
+		pieceSelected = false;
+		notYourTurn = 0;
+		red_score = 0;
+		black_score = 0;
+		red_left = 12;
+		black_left = 12;
+		moves = 0;
+		cout << "Reset values" << endl;
+		for(int i = 0; i < 8; i++){
+			for(int j = 0; j < 8; j++){
+				board_arr[i][j] = orignal_board_arr[i][j];
+				cout << board_arr[i][j];
+			}
+			cout << endl;
+		}
+
+	}
 	
 	void switchPlayerTurn(){
 		if(currentPlayerPiece == 1 && currentKingPiece == 2){
@@ -133,6 +170,7 @@ private:
 	Text gameOver[MAX_NUMBER_OF_ITEMS];
 	float width, height;
 	int dive = 8;
+	int selectedItemIndex;
 
 public:
 	GameOver(float width, float height)
@@ -157,9 +195,9 @@ public:
 				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
 
 				gameOver[1].setFont(f);
-				gameOver[0].setScale(0.8, 0.8);
-				gameOver[1].setFillColor(sf::Color::White);
-				gameOver[1].setString("Return to Menu");
+				gameOver[1].setScale(0.8, 0.8);
+				gameOver[1].setFillColor(sf::Color::Cyan);
+				gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
 				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
 			}
 			else if(draw == 2){
@@ -170,9 +208,9 @@ public:
 				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
 
 				gameOver[1].setFont(f);
-				gameOver[0].setScale(0.8, 0.8);
-				gameOver[1].setFillColor(sf::Color::White);
-				gameOver[1].setString("Return to Menu");
+				gameOver[1].setScale(0.8, 0.8);
+				gameOver[1].setFillColor(sf::Color::Cyan);
+			gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
 				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
 			}
 			else if(draw == 3){
@@ -183,9 +221,9 @@ public:
 				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
 
 				gameOver[1].setFont(f);
-				gameOver[0].setScale(0.8, 0.8);
-				gameOver[1].setFillColor(sf::Color::White);
-				gameOver[1].setString("Return to Menu");
+				gameOver[1].setScale(0.8, 0.8);
+				gameOver[1].setFillColor(sf::Color::Cyan);
+				gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
 				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
 			}
 		}
@@ -197,9 +235,9 @@ public:
 			gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
 
 			gameOver[1].setFont(f);
-			gameOver[0].setScale(0.8, 0.8);
-			gameOver[1].setFillColor(sf::Color::White);
-			gameOver[1].setString("Return to Menu");
+			gameOver[1].setScale(0.8, 0.8);
+			gameOver[1].setFillColor(sf::Color::Cyan);
+			gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
 			gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
 		}
 		else if(opt == 3 && draw == 0){
@@ -210,9 +248,9 @@ public:
 			gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
 
 			gameOver[1].setFont(f);
-			gameOver[0].setScale(0.8, 0.8);
-			gameOver[1].setFillColor(sf::Color::White);
-			gameOver[1].setString("Return to Menu");
+			gameOver[1].setScale(0.8, 0.8);
+			gameOver[1].setFillColor(sf::Color::Cyan);
+			gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
 			gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
 
 		}
@@ -247,6 +285,24 @@ public:
 			}
 		}
 		return false;
+	}
+	void MoveUp()
+	{
+		if (selectedItemIndex - 1 >= 0)
+		{
+			gameOver[selectedItemIndex].setFillColor(sf::Color::White);
+			selectedItemIndex--;
+			gameOver[selectedItemIndex].setFillColor(sf::Color::Red);
+		}
+	}
+	void MoveDown()
+	{
+		if (selectedItemIndex + 1 < MAX_NUMBER_OF_ITEMS)
+		{
+			gameOver[selectedItemIndex].setFillColor(sf::Color::White);
+			selectedItemIndex++;
+			gameOver[selectedItemIndex].setFillColor(sf::Color::Red);
+		}
 	}
 
 };
@@ -487,9 +543,7 @@ bool isValidMoveAvailable(Player& player, int pieceIndex)
 
 int main()
 {
-
 	RenderWindow window(VideoMode(453, 454), "2 Player Checker Game", Style::Titlebar | Style::Close); //create window
-
 	bool menu, game, result;	//create bools for menu, game, and end
 	menu = true;			//set menu to true
 	game = false;			//set game to false
@@ -500,7 +554,7 @@ int main()
 
 	bool movePiece = false;	//check if piece is moving
 	float dx = 0, dy = 0;	//delta x and delta y
-	float speed = 0.1;		//speed of piece
+	//float speed = 0.1;		//speed of piece
 	int n = 0;
 	bool call_is_capture;
 	int king[24];		//array to store if piece is king
@@ -575,8 +629,8 @@ int main()
         while (window.pollEvent(event)) //while window is polling for event
         {
 			switch (event.type) //switch statement for event type
-			{
-
+			{ 
+				//sleep(seconds(3));//adding delay
 				case sf::Event::KeyReleased:
 					switch (event.key.code)
 					{
@@ -592,9 +646,10 @@ int main()
 						switch (menU.GetPressedItem())
 						{
 						case 0:
-							std::cout << "Play button has been pressed" << std::endl;
+							cout << "Play button has been pressed" << endl;
 							menu = false;
 							game = true;
+							result = false;
 							break;
 						case 1:
 							window.close();
@@ -637,6 +692,7 @@ int main()
 								std::cout << "Play button has been pressed" << std::endl;
 								menu = false;
 								game = true;
+								result = false;
 								break;
 							case 1:
 								window.close();
@@ -705,7 +761,8 @@ int main()
 							case 0:
 								std::cout << "Play button has been pressed" << std::endl;
 								menu = false;
-								game = true;
+								game = false;
+								result = false;
 								break;
 							case 1:
 								window.close();
@@ -858,7 +915,7 @@ int main()
 								}
 								cout << endl;
 							}
-							if(player1.moves == 32 || (player1.black_left<=1 && player1.red_left>2) || (player1.red_left<=1 && player1.black_left>2)){
+							if(player1.moves == 32 || (player1.black_left<=11 && player1.red_left>2) || (player1.red_left<=11 && player1.black_left>2)){
 								cout << "Game over!" << endl;
 								if(player1.moves == 32){
 									if(player1.black_score > player1.red_score){
@@ -877,14 +934,14 @@ int main()
 									menu = false;
 									game = false;
 								}
-								else if(player1.black_left<=1 && player1.red_left>2){
+								else if(player1.black_left<=11 && player1.red_left>2){
 									cout << "Player 2 wins!" << endl;
 									gameover.setFont(2,0);
 									result = true;
 									menu = false;
 									game = false;
 								}
-								else if(player1.black_left>2 && player1.red_left<=1){
+								else if(player1.black_left>2 && player1.red_left<=11){
 									cout << "Player 1 wins!" << endl;
 									gameover.setFont(3,0);
 									result = true;
@@ -926,6 +983,15 @@ int main()
 				}
 				break;	//break
 
+			case Event::KeyPressed:
+				if(result == true){
+					//if enter pressed return to main menu
+					if(event.key.code == Keyboard::Escape){
+						window.close();
+					}
+				}
+				break;
+
 			case Event::Closed: //if window is closed
 				window.close();     //close window
 				break;                  //break
@@ -944,18 +1010,18 @@ int main()
 		else if(game == true){
 			window.draw(boardSprite);	//draw red piece
 			for (int i = 0; i < 24; i++) {
-			if (king[i] == 1) {
-				// Calculate the position for the "K" text relative to the king piece
-				Vector2f kingPosition = pieces[i].getPosition();
-				Text textR("K", font, 15); // Adjust font size as needed
-				textR.setPosition(kingPosition.x + 5, kingPosition.y + 5); // Adjust position as needed
+				if (king[i] == 1) {
+					// Calculate the position for the "K" text relative to the king piece
+					Vector2f kingPosition = pieces[i].getPosition();
+					Text textR("K", font, 15); // Adjust font size as needed
+					textR.setPosition(kingPosition.x + 5, kingPosition.y + 5); // Adjust position as needed
 
-				// Draw the king piece, then the associated text
-				window.draw(pieces[i]);
-				window.draw(textR);
-			} else {
-				window.draw(pieces[i]);
-			}
+					// Draw the king piece, then the associated text
+					window.draw(pieces[i]);
+					window.draw(textR);
+				} else {
+					window.draw(pieces[i]);
+				}
 			}
 		}
 		else if(result == true){
