@@ -398,7 +398,14 @@ bool canPieceCaptureAgain(int newRowVar, int newColVar, int currentPiece, int k)
 	}
 	return false;
 }
+Music KillSound;
+void killSound(){
 
+	if(!KillSound.openFromFile("sounds/kill.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	KillSound.play();
+}
 void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, int &captureCol, int &n){
     // Update the game state
 	pieces[n].setPosition(newCol * tileSize, newRow * tileSize);
@@ -406,7 +413,6 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
     board_arr[oldRow][oldCol] = 0;
     board_arr[captureRow][captureCol] = 0;
 	player1.moves = 0;
-	checkerSound();
     // Find the index of the captured piece in the pieces array
     int capturedPieceIndex = -1;
     for (int i = 0; i < 24; i++) {
@@ -431,6 +437,7 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
 			cout << "Red Left: " << player1.red_left << endl;
 		}
         pieces[capturedPieceIndex].setPosition(-100, -100); // Move it off the screen
+		killSound();
     }
 
     // Finish the move and switch players' turns
@@ -495,51 +502,54 @@ bool isValidMoveAvailable(Player& player, int pieceIndex)
 
     return false;
 }
-
+Music pop;
 void PopSound(){
-	SoundBuffer buffer;
-	if(!buffer.loadFromFile("sound/pop.ogg")){
+	
+	if(!pop.openFromFile("sounds/pop.ogg")){
 		cout << "Error loading sound" << endl;
 	}
-	Sound pop;
-	pop.setBuffer(buffer);
+	pop.setVolume(100.f);
 	pop.play();
 }
+Music start;
 void startSound(){
-	SoundBuffer buffer;
-	if(!buffer.loadFromFile("sound/board-start.ogg")){
+	
+	if(!start.openFromFile("sounds/board-start.ogg")){
 		cout << "Error loading sound" << endl;
 	}
-	Sound start;
-	start.setBuffer(buffer);
 	start.play();
 }
+Music checker;
 void checkerSound(){
-	SoundBuffer buffer;
-	if(!buffer.loadFromFile("sound/checker.ogg")){
+	
+	if(!checker.openFromFile("sounds/checker.ogg")){
 		cout << "Error loading sound" << endl;
 	}
-	Sound step;
-	step.setBuffer(buffer);
-	step.play();
+	checker.play();
 }
+Music w;
 void winSound(){
-	SoundBuffer buffer;
-	if(!buffer.loadFromFile("sound/win.ogg")){
+
+	if(!w.openFromFile("sounds/win.ogg")){
 		cout << "Error loading sound" << endl;
 	}
-	Sound w;
-	w.setBuffer(buffer);
 	w.play();
 }
+Music k;
 void KingSound(){
-	SoundBuffer buffer;
-	if(!buffer.loadFromFile("sound/king.ogg")){
+
+	if(!k.openFromFile("sounds/king.ogg")){
 		cout << "Error loading sound" << endl;
 	}
-	Sound k;
-	k.setBuffer(buffer);
 	k.play();
+}
+Music wrong;
+void wrongMoveSound(){
+
+	if(!wrong.openFromFile("sounds/wrong_piece.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	wrong.play();
 }
 
 
@@ -810,28 +820,7 @@ int main()
 						cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
 					}
 					else if(result == true){
-						// Get mouse position
-						// Vector2i mousePos = Mouse::getPosition(window);
-
-						// // Check if the mouse position is within the bounds of menu items
-						// if (menU.isMouseOverItem(mousePos))
-						// {
-						// 	// Get mouse position
-						// 	int selectedItem = menU.GetPressedItem();
-						// 	switch (selectedItem)
-						// 	{
-						// 	case 0:
-						// 		cout << "Play button has been pressed" << endl;
-						// 		menu = false;
-						// 		instruc = true;
-						// 		game = false;
-						// 		result = false;
-						// 		break;
-						// 	case 1:
-						// 		window.close();
-						// 		break;
-						// 	}
-						// }
+						
 					}
 				}
                 break;        //break
@@ -876,6 +865,7 @@ int main()
 													// Valid jump
 													cout << "Kill func call" << endl;
 													Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol, n);
+													// checkerSound();
 													if (canPieceCaptureAgain(newRow, newCol, player1.currentPlayerPiece, board_arr[newRow][newCol])) {
 														cout << "You can capture again!" << endl;
 														oldPos = newPos; // Update the old position to the new position
@@ -903,12 +893,14 @@ int main()
 													// Invalid move, revert to the original position
 													player1.switchPlayerTurn();	//switch player turn
 													pieces[n].setPosition(originalPos);
+													wrongMoveSound();
 												}
 											}
 											else{
 													// Invalid move, revert to the original position
 													player1.switchPlayerTurn();	//switch player turn
 													pieces[n].setPosition(originalPos);
+													wrongMoveSound();
 												}
 										}
 										else if (abs(newRow - oldRow) == 1 && abs(newCol - oldCol) == 1 && board_arr[newRow][newCol] == 0){
@@ -917,6 +909,7 @@ int main()
 												board_arr[newRow][newCol] = board_arr[oldRow][oldCol];
 												board_arr[oldRow][oldCol] = 0;
 												player1.moves++;
+												checkerSound();
 												cout << "Checking king promotion conditions..." << endl;
 												if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
 													(player1.currentPlayerPiece == -1 && newRow == 0)) {
@@ -925,7 +918,7 @@ int main()
 														board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
 														cout << "King me!" << endl;
 														king[n] = 1;//set king to 1
-														//player1.switchPlayerTurn();	//switch player turn
+														KingSound();
 												}
 												else{
 													cout << "Not king me!" << endl;
@@ -937,28 +930,33 @@ int main()
 												// Invalid move, revert to the original position
 												player1.switchPlayerTurn();	//switch player turn
 												pieces[n].setPosition(originalPos);
+												wrongMoveSound();
 											}
 										}
 										else{
 											// Invalid move, revert to the original position
 											player1.switchPlayerTurn();	//switch player turn
 											pieces[n].setPosition(originalPos);
+											wrongMoveSound();
 										}
 									}
 									else if(board_arr[newRow][newCol] == 1){
 										// Invalid move, revert to the original position
 										player1.switchPlayerTurn();	//switch player turn
 										pieces[n].setPosition(originalPos);
+										wrongMoveSound();
 									}
 									else if(board_arr[newRow][newCol] == -1){
 										// Invalid move, revert to the original position
 										player1.switchPlayerTurn();	//switch player turn
 										pieces[n].setPosition(originalPos);
+										wrongMoveSound();
 									}
 									else if(board_arr[newRow][newCol] == -9){
 										// Invalid move, revert to the original position
 										player1.switchPlayerTurn();	//switch player turn
 										pieces[n].setPosition(originalPos);
+										wrongMoveSound();
 									}
 
 							} else if (newRow >= 0 && newRow < boardSize && newCol >= 0 && newCol < boardSize &&
@@ -966,6 +964,7 @@ int main()
 								// Invalid move, revert to the original position
 								player1.switchPlayerTurn();	//switch player turn
 								pieces[n].setPosition(originalPos);
+								wrongMoveSound();
 							}
 							
 
@@ -996,6 +995,7 @@ int main()
 									result = true;
 									menu = false;
 									game = false;
+									winSound();
 								}
 								else if(player1.black_left<=1 && player1.red_left>2){
 									cout << "Player 2 wins!" << endl;
@@ -1003,6 +1003,7 @@ int main()
 									result = true;
 									menu = false;
 									game = false;
+									winSound();
 								}
 								else if(player1.black_left>2 && player1.red_left<=1){
 									cout << "Player 1 wins!" << endl;
@@ -1010,6 +1011,7 @@ int main()
 									result = true;
 									menu = false;
 									game = false;
+									winSound();
 								}
 							}
 							else if((player1.black_left<=1 && player1.red_left<=2) || (player1.red_left<=1 && player1.black_left<=2)){
@@ -1019,6 +1021,7 @@ int main()
 									result = true;
 									menu = false;
 									game = false;
+									winSound();
 								}
 								else if(player1.red_left == 0){
 									cout << "Player 1 wins!" << endl;
@@ -1026,6 +1029,7 @@ int main()
 									result = true;
 									menu = false;
 									game = false;
+									winSound();
 								}
 								else{
 									cout << "Game Continues!" << endl;
@@ -1036,8 +1040,7 @@ int main()
 						
 					}
 				}else{
-					if(menu == true){}
-					else if(game == true){
+					if(game == true){
 						cout << "Player , please select a piece to move!" << endl;
 					}
 				}
@@ -1050,6 +1053,7 @@ int main()
 						instruc = false;
 						game = true;
 						result = false;
+						startSound();
 					}
 				}
 				else if(result == true){
@@ -1077,6 +1081,7 @@ int main()
 		if(instruc == true){
 			Instructions ins;
 			ins.draw(window);
+
 		}
 		else if(game == true){
 			window.draw(boardSprite);	//draw red piece
