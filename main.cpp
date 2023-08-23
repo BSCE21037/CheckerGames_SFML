@@ -1,4 +1,5 @@
 #include <SFML/Graphics.hpp>
+#include <SFML/Audio.hpp>
 #include <iostream>
 using namespace std;
 using namespace sf;
@@ -315,6 +316,32 @@ int tileValue[8][8];			//value of tile
 
 int size = 5;	//size of piece
 
+class Instructions
+{
+public:
+void draw(sf::RenderWindow &window)
+	{
+		Font f;
+		f.loadFromFile("arial.ttf");
+		Text text;
+		Text text1;
+
+		text.setFont(f);
+		text.setScale(1.5, 1.5);
+		text.setFillColor(sf::Color::Yellow);
+		text.setString("Instructions:");
+		text.setStyle(Text::Bold);
+		text.setPosition(sf::Vector2f(0, 0));
+		text1.setFont(f);
+		text1.setScale(0.6, 0.6);
+		text1.setFillColor(sf::Color::Yellow);
+		text1.setString("	This is a 2 player checker game. Player1 has black\npieces and player2 has red pieces. The game will start\nfrom player1.\n\n	The Game is based on Basic Checker rules including\nmultiple kills and pieces becoming king. However the\nwinning criteria is as follows:\n1)If a player has no more pieces left on the board,\n   opponent wins.\n2)If a player has only one piece and opponent has 3 or\n   more pieces, opponent wins.\n3)If both players have wasted 32 moves(16 each)\n   without killing then:\n   a)The Player with greater score Wins.\n   b)If both players have same score, its a draw.\n   (1 score on each kill)\n\nPress A to start the game.");
+		text1.setPosition(sf::Vector2f(0, 60));
+		window.draw(text);
+		window.draw(text1);
+	}
+};
+
 
 void loadPosition(){
 	int k = 0;
@@ -335,12 +362,6 @@ void loadPosition(){
 				pieces[k].setPosition(j * tileSize, i * tileSize);
 				k++;
 			}
-			// else if (n == 2 || n == -2) { // King pieces
-            //     int textureIndex = (n == 2) ? 2 : -2; // Adjust texture index for kings
-            //     pieces[k].setTextureRect(IntRect(0.7 * textureIndex, 0, 0.7, 0.7)); // Set texture rect for kings
-            //     pieces[k].setPosition(j * tileSize, i * tileSize);
-            //     k++;
-            // }
 		}
 	}	
 }
@@ -385,6 +406,7 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
     board_arr[oldRow][oldCol] = 0;
     board_arr[captureRow][captureCol] = 0;
 	player1.moves = 0;
+	checkerSound();
     // Find the index of the captured piece in the pieces array
     int capturedPieceIndex = -1;
     for (int i = 0; i < 24; i++) {
@@ -474,6 +496,53 @@ bool isValidMoveAvailable(Player& player, int pieceIndex)
     return false;
 }
 
+void PopSound(){
+	SoundBuffer buffer;
+	if(!buffer.loadFromFile("sound/pop.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	Sound pop;
+	pop.setBuffer(buffer);
+	pop.play();
+}
+void startSound(){
+	SoundBuffer buffer;
+	if(!buffer.loadFromFile("sound/board-start.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	Sound start;
+	start.setBuffer(buffer);
+	start.play();
+}
+void checkerSound(){
+	SoundBuffer buffer;
+	if(!buffer.loadFromFile("sound/checker.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	Sound step;
+	step.setBuffer(buffer);
+	step.play();
+}
+void winSound(){
+	SoundBuffer buffer;
+	if(!buffer.loadFromFile("sound/win.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	Sound w;
+	w.setBuffer(buffer);
+	w.play();
+}
+void KingSound(){
+	SoundBuffer buffer;
+	if(!buffer.loadFromFile("sound/king.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	Sound k;
+	k.setBuffer(buffer);
+	k.play();
+}
+
+
 
 
 //RectangleShape tile(sf::Vector2f(tileSize, tileSize));	//create tile   (global variable)
@@ -544,8 +613,9 @@ bool isValidMoveAvailable(Player& player, int pieceIndex)
 int main()
 {
 	RenderWindow window(VideoMode(453, 454), "2 Player Checker Game", Style::Titlebar | Style::Close); //create window
-	bool menu, game, result;	//create bools for menu, game, and end
+	bool menu, instruc, game, result;	//create bools for menu, game, and end
 	menu = true;			//set menu to true
+	instruc = false;		//set instructions to false
 	game = false;			//set game to false
 	result = false;			//set end to false
 
@@ -554,7 +624,6 @@ int main()
 
 	bool movePiece = false;	//check if piece is moving
 	float dx = 0, dy = 0;	//delta x and delta y
-	//float speed = 0.1;		//speed of piece
 	int n = 0;
 	bool call_is_capture;
 	int king[24];		//array to store if piece is king
@@ -599,21 +668,10 @@ int main()
 	for(int i = 0; i < 12; i++){		//for loop
 		pieces[i].setTexture(red);		//set texture to sprite
 		pieces[i].setScale(0.022, 0.022);	//set scale of sprite
-		// textR.setFont(font);	//set font of text
-		// textR.setString("K");	//set string of text
-		// textR.setCharacterSize(20);	//set character size of text
-		// textR.setFillColor(Color::White);	//set fill color of text
-		// textR.setPosition(pieces[i].getPosition().x + 5, pieces[i].getPosition().y + 5);	//set position of text
-
 	}
 	for(int i = 12; i < 24; i++){		//for loop
 		pieces[i].setTexture(black);		//set texture to sprite
 		pieces[i].setScale(0.07, 0.07);	//set scale of sprite
-		// textR.setFont(font);	//set font of text
-		// textR.setString("K");	//set string of text
-		// textR.setCharacterSize(20);	//set character size of text
-		// textR.setFillColor(Color::White);	//set fill color of text
-		// textR.setPosition(pieces[i].getPosition().x + 5, pieces[i].getPosition().y + 5);	//set position of text
 	}
 
 	Menu menU(window.getSize().x, window.getSize().y);	//create menu
@@ -648,8 +706,10 @@ int main()
 						case 0:
 							cout << "Play button has been pressed" << endl;
 							menu = false;
-							game = true;
+							instruc = true;
+							game = false;
 							result = false;
+							PopSound();
 							break;
 						case 1:
 							window.close();
@@ -691,8 +751,10 @@ int main()
 							case 0:
 								std::cout << "Play button has been pressed" << std::endl;
 								menu = false;
-								game = true;
+								instruc = true;
+								game = false;
 								result = false;
+								PopSound();
 								break;
 							case 1:
 								window.close();
@@ -749,26 +811,27 @@ int main()
 					}
 					else if(result == true){
 						// Get mouse position
-						Vector2i mousePos = Mouse::getPosition(window);
+						// Vector2i mousePos = Mouse::getPosition(window);
 
-						// Check if the mouse position is within the bounds of menu items
-						if (menU.isMouseOverItem(mousePos))
-						{
-							// Get mouse position
-							int selectedItem = menU.GetPressedItem();
-							switch (selectedItem)
-							{
-							case 0:
-								std::cout << "Play button has been pressed" << std::endl;
-								menu = false;
-								game = false;
-								result = false;
-								break;
-							case 1:
-								window.close();
-								break;
-							}
-						}
+						// // Check if the mouse position is within the bounds of menu items
+						// if (menU.isMouseOverItem(mousePos))
+						// {
+						// 	// Get mouse position
+						// 	int selectedItem = menU.GetPressedItem();
+						// 	switch (selectedItem)
+						// 	{
+						// 	case 0:
+						// 		cout << "Play button has been pressed" << endl;
+						// 		menu = false;
+						// 		instruc = true;
+						// 		game = false;
+						// 		result = false;
+						// 		break;
+						// 	case 1:
+						// 		window.close();
+						// 		break;
+						// 	}
+						// }
 					}
 				}
                 break;        //break
@@ -776,8 +839,7 @@ int main()
             case Event::MouseButtonReleased:	//if key is released
 				
 				if (event.mouseButton.button == Mouse::Left) {
-					if(menu == true){}
-					else if(game == true){
+					if(game == true){
 						// Get the center position of the dropped piece
 						Vector2f p = pieces[n].getPosition() + Vector2f(tileSize / 2, tileSize / 2);
 
@@ -831,6 +893,7 @@ int main()
 															board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
 															cout << "King me!" << endl;
 															king[n] = 1;//set king to 1
+															KingSound();
 													}
 													else{
 														cout << "Not king me!" << endl;
@@ -915,7 +978,7 @@ int main()
 								}
 								cout << endl;
 							}
-							if(player1.moves == 32 || (player1.black_left<=11 && player1.red_left>2) || (player1.red_left<=11 && player1.black_left>2)){
+							if(player1.moves == 32 || (player1.black_left<=1 && player1.red_left>2) || (player1.red_left<=1 && player1.black_left>2)){
 								cout << "Game over!" << endl;
 								if(player1.moves == 32){
 									if(player1.black_score > player1.red_score){
@@ -934,14 +997,14 @@ int main()
 									menu = false;
 									game = false;
 								}
-								else if(player1.black_left<=11 && player1.red_left>2){
+								else if(player1.black_left<=1 && player1.red_left>2){
 									cout << "Player 2 wins!" << endl;
 									gameover.setFont(2,0);
 									result = true;
 									menu = false;
 									game = false;
 								}
-								else if(player1.black_left>2 && player1.red_left<=11){
+								else if(player1.black_left>2 && player1.red_left<=1){
 									cout << "Player 1 wins!" << endl;
 									gameover.setFont(3,0);
 									result = true;
@@ -972,9 +1035,6 @@ int main()
 						}
 						
 					}
-					// else if(result  == true){
-						
-					// }
 				}else{
 					if(menu == true){}
 					else if(game == true){
@@ -984,7 +1044,15 @@ int main()
 				break;	//break
 
 			case Event::KeyPressed:
-				if(result == true){
+				if(instruc == true){
+					if(event.key.code == Keyboard::A){
+						menu = false;
+						instruc = false;
+						game = true;
+						result = false;
+					}
+				}
+				else if(result == true){
 					//if enter pressed return to main menu
 					if(event.key.code == Keyboard::Escape){
 						window.close();
@@ -1002,10 +1070,13 @@ int main()
 			}	  
         }
         window.clear(); //clear window
-        //drawChessBoard(window);        //draw chess board
 		if(menu == true){
 			window.draw(boardSprite);	//draw menu
 			menU.draw(window);
+		}
+		if(instruc == true){
+			Instructions ins;
+			ins.draw(window);
 		}
 		else if(game == true){
 			window.draw(boardSprite);	//draw red piece
@@ -1025,7 +1096,7 @@ int main()
 			}
 		}
 		else if(result == true){
-			window.draw(boardSprite);	//draw menu
+			window.draw(boardSprite);	//draw board
 			gameover.draw(window);
 		}
         window.display();    //display window
