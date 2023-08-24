@@ -1,96 +1,14 @@
 #include <SFML/Graphics.hpp>
 #include <SFML/Audio.hpp>
 #include <iostream>
+#include "menu.cpp"
+#include "player.cpp"
+#include "gameOver.cpp"
+#include "instructions.cpp"
 using namespace std;
 using namespace sf;
-#define MAX_NUMBER_OF_ITEMS 2
 
-class Menu
-{
-private:
-	int selectedItemIndex;
-	Font font;
-	Text menu[MAX_NUMBER_OF_ITEMS];
-
-public:
-	Menu(float width, float height)
-	{
-		if (!font.loadFromFile("arial.ttf"))
-		{
-			cout << "Error loading text" << endl;	//print error message
-		}
-
-		menu[0].setFont(font);
-		menu[0].setFillColor(sf::Color::Red);
-		menu[0].setString("Play");
-		menu[0].setPosition(sf::Vector2f(width / 2, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
-
-		menu[1].setFont(font);
-		menu[1].setFillColor(sf::Color::White);
-		menu[1].setString("Exit");
-		menu[1].setPosition(sf::Vector2f(width / 2, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-
-		selectedItemIndex = 0;
-	}
-	~Menu(){
-	}
-
-	void draw(sf::RenderWindow &window)
-	{
-		for (int i = 0; i < MAX_NUMBER_OF_ITEMS; i++)
-		{
-			window.draw(menu[i]);
-		}
-	}
-	void MoveUp()
-	{
-		if (selectedItemIndex - 1 >= 0)
-		{
-			menu[selectedItemIndex].setFillColor(sf::Color::White);
-			selectedItemIndex--;
-			menu[selectedItemIndex].setFillColor(sf::Color::Red);
-		}
-	}
-	void MoveDown()
-	{
-		if (selectedItemIndex + 1 < MAX_NUMBER_OF_ITEMS)
-		{
-			menu[selectedItemIndex].setFillColor(sf::Color::White);
-			selectedItemIndex++;
-			menu[selectedItemIndex].setFillColor(sf::Color::Red);
-		}
-	}
-	bool isMouseOverItem(const sf::Vector2i& mousePos) const
-	{
-		for (size_t i = 0; i < MAX_NUMBER_OF_ITEMS; ++i)
-		{
-			const sf::FloatRect bounds = menu[i].getGlobalBounds();
-			if (bounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	int GetPressedItem() { return selectedItemIndex; }
-
-};
-
-
-Sprite pieces[24];	//array of piec
-int orignal_board_arr[8][8] = {	//board array
-	-9, -1, -9,-1, -9,-1, -9,-1,	// --------
-	-1, -9,-1, -9,-1, -9,-1, -9,// player 1
-	-9, -1, -9,-1, -9,-1, -9,-1,// --------
-
-	0, -9, 0, -9, 0, -9, 0, -9,
-	-9, 0, -9, 0, -9, 0, -9, 0,
-
-	1, -9, 1, -9, 1, -9, 1, -9,// --------
-	-9, 1, -9, 1, -9, 1, -9, 1, // player 2
-	1, -9, 1, -9, 1, -9, 1, -9// --------
-	
-};
+Sprite pieces[24];	//array of pieces
 int board_arr[8][8] = {	//board array
 	-9, -1, -9,-1, -9,-1, -9,-1,	// --------
 	-1, -9,-1, -9,-1, -9,-1, -9,// player 1
@@ -105,243 +23,10 @@ int board_arr[8][8] = {	//board array
 	
 };
 
-class Player{
-
-public:
-	int currentPlayerPiece = 1;
-	int opponentPiece = -1;
-	int currentKingPiece = 2;
-	int opponentKingPiece = -2;
-	bool pieceSelected = false;
-	int notYourTurn = 0;
-	int red_score = 0;
-	int black_score = 0;
-	int red_left = 12;
-	int black_left = 12;
-	int moves = 0;
-
-	void resetPlayer(){
-		//reset all values back
-		currentPlayerPiece = 1;
-		opponentPiece = -1;
-		currentKingPiece = 2;
-		opponentKingPiece = -2;
-		pieceSelected = false;
-		notYourTurn = 0;
-		red_score = 0;
-		black_score = 0;
-		red_left = 12;
-		black_left = 12;
-		moves = 0;
-		cout << "Reset values" << endl;
-		for(int i = 0; i < 8; i++){
-			for(int j = 0; j < 8; j++){
-				board_arr[i][j] = orignal_board_arr[i][j];
-				cout << board_arr[i][j];
-			}
-			cout << endl;
-		}
-
-	}
-	
-	void switchPlayerTurn(){
-		if(currentPlayerPiece == 1 && currentKingPiece == 2){
-			currentPlayerPiece = -1;
-			currentKingPiece = -2;
-			opponentPiece = 1;
-			opponentKingPiece = 2;
-		}
-		else{
-			currentPlayerPiece = 1;
-			currentKingPiece = 2;
-			opponentPiece = -1;
-			opponentKingPiece = -2;
-		}
-	}
-	
-	
-};
-
 Player player1;
-
-class GameOver
-{
-private:
-	Font f;
-	Text gameOver[MAX_NUMBER_OF_ITEMS];
-	float width, height;
-	int dive = 8;
-	int selectedItemIndex;
-
-public:
-	GameOver(float width, float height)
-	{
-		this->width = width;
-		this->height = height;
-	}
-
-	void setFont(int opt, int draw)
-	{
-		if (!f.loadFromFile("arial.ttf"))
-		{
-			cout << "Error loading text" << endl;	//print error message
-		}
-
-		if(opt == 1 && draw != 0){
-			if(draw == 1){
-				gameOver[0].setFont(f);
-				gameOver[0].setScale(0.8, 0.8);
-				gameOver[0].setFillColor(sf::Color::Black);
-				gameOver[0].setString("Player 1 Wins(Greater Score)");
-				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
-
-				gameOver[1].setFont(f);
-				gameOver[1].setScale(0.8, 0.8);
-				gameOver[1].setFillColor(sf::Color::Cyan);
-				gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
-				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-			}
-			else if(draw == 2){
-				gameOver[0].setFont(f);
-				gameOver[0].setScale(0.8, 0.8);
-				gameOver[0].setFillColor(sf::Color::Red);
-				gameOver[0].setString("Player 2 Wins(Greater Score)");
-				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
-
-				gameOver[1].setFont(f);
-				gameOver[1].setScale(0.8, 0.8);
-				gameOver[1].setFillColor(sf::Color::Cyan);
-			gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
-				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-			}
-			else if(draw == 3){
-				gameOver[0].setFont(f);
-				gameOver[0].setScale(0.8, 0.8);
-				gameOver[0].setFillColor(sf::Color::Blue);
-				gameOver[0].setString("Its a Draw");
-				gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
-
-				gameOver[1].setFont(f);
-				gameOver[1].setScale(0.8, 0.8);
-				gameOver[1].setFillColor(sf::Color::Cyan);
-				gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
-				gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-			}
-		}
-		else if(opt == 2 && draw == 0){
-			gameOver[0].setFont(f);
-			gameOver[0].setScale(0.8, 0.8);
-			gameOver[0].setFillColor(sf::Color::Red);
-			gameOver[0].setString("Player 2 Wins(Dominates the Board)");
-			gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
-
-			gameOver[1].setFont(f);
-			gameOver[1].setScale(0.8, 0.8);
-			gameOver[1].setFillColor(sf::Color::Cyan);
-			gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
-			gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-		}
-		else if(opt == 3 && draw == 0){
-			gameOver[0].setFont(f);
-			gameOver[0].setScale(0.8, 0.8);
-			gameOver[0].setFillColor(sf::Color::Black);
-			gameOver[0].setString("Player 1 Wins(Dominates the Board)");
-			gameOver[0].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 1));
-
-			gameOver[1].setFont(f);
-			gameOver[1].setScale(0.8, 0.8);
-			gameOver[1].setFillColor(sf::Color::Cyan);
-			gameOver[1].setString("Press Esc to Exit\n Thanks for Playing   :)\n   made by Musa");
-			gameOver[1].setPosition(sf::Vector2f(width / dive, height / (MAX_NUMBER_OF_ITEMS + 1) * 2));
-
-		}
-
-	}
-	
-	void setWidth(float w)
-	{
-		width = w;
-	}
-	void setHeight(float h)
-	{
-		height = h;
-	}
-
-
-	void draw(sf::RenderWindow &window)
-	{
-		for (int i = 0; i < MAX_NUMBER_OF_ITEMS; i++)
-		{
-			window.draw(gameOver[i]);
-		}
-	}
-	bool isMouseOverItem(const sf::Vector2i& mousePos) const
-	{
-		for (size_t i = 0; i < MAX_NUMBER_OF_ITEMS; ++i)
-		{
-			const sf::FloatRect bounds = gameOver[i].getGlobalBounds();
-			if (bounds.contains(static_cast<float>(mousePos.x), static_cast<float>(mousePos.y)))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-	void MoveUp()
-	{
-		if (selectedItemIndex - 1 >= 0)
-		{
-			gameOver[selectedItemIndex].setFillColor(sf::Color::White);
-			selectedItemIndex--;
-			gameOver[selectedItemIndex].setFillColor(sf::Color::Red);
-		}
-	}
-	void MoveDown()
-	{
-		if (selectedItemIndex + 1 < MAX_NUMBER_OF_ITEMS)
-		{
-			gameOver[selectedItemIndex].setFillColor(sf::Color::White);
-			selectedItemIndex++;
-			gameOver[selectedItemIndex].setFillColor(sf::Color::Red);
-		}
-	}
-
-};
 
 const int boardSize = 8;	//size of board
 const int tileSize = 58;	//size of tiles
-int tileCheck = 0;			//check if tile is white or black
-int tileValue[8][8];			//value of tile
-
-
-int size = 5;	//size of piece
-
-class Instructions
-{
-public:
-void draw(sf::RenderWindow &window)
-	{
-		Font f;
-		f.loadFromFile("arial.ttf");
-		Text text;
-		Text text1;
-
-		text.setFont(f);
-		text.setScale(1.5, 1.5);
-		text.setFillColor(sf::Color::Yellow);
-		text.setString("Instructions:");
-		text.setStyle(Text::Bold);
-		text.setPosition(sf::Vector2f(0, 0));
-		text1.setFont(f);
-		text1.setScale(0.6, 0.6);
-		text1.setFillColor(sf::Color::Yellow);
-		text1.setString("	This is a 2 player checker game. Player1 has black\npieces and player2 has red pieces. The game will start\nfrom player1.\n\n	The Game is based on Basic Checker rules including\nmultiple kills and pieces becoming king. However the\nwinning criteria is as follows:\n1)If a player has no more pieces left on the board,\n   opponent wins.\n2)If a player has only one piece and opponent has 3 or\n   more pieces, opponent wins.\n3)If both players have wasted 32 moves(16 each)\n   without killing then:\n   a)The Player with greater score Wins.\n   b)If both players have same score, its a draw.\n   (1 score on each kill)\n\nPress A to start the game.");
-		text1.setPosition(sf::Vector2f(0, 60));
-		window.draw(text);
-		window.draw(text1);
-	}
-};
-
 
 void loadPosition(){
 	int k = 0;
@@ -382,23 +67,74 @@ bool isCaptureValid(int oldRow, int oldCol, int newRow, int newCol) {
 }
 
 bool canPieceCaptureAgain(int newRowVar, int newColVar, int currentPiece, int k){
-	if (k == 2 || k == -2) {
+	if (k == 2 || k == -2) {	//if piece is king
         if (isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar + 2) ||
             isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar - 2) ||
             isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar + 2) ||
-            isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar - 2)) {
+            isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar - 2)) {	
             return true;
         }
     }
 	if((isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar + 2) && currentPiece == -1)|| 
 	(isCaptureValid(newRowVar, newColVar, newRowVar + 2, newColVar - 2) && currentPiece == -1) || 
 	(isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar + 2) && currentPiece == 1) || 
-	(isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar - 2)&& currentPiece == 1)){
+	(isCaptureValid(newRowVar, newColVar, newRowVar - 2, newColVar - 2)&& currentPiece == 1)){	//if piece is not king
 		return true;
 	}
 	return false;
 }
+
+//loading Sounds
+Music pop;
+Music start;
+Music checker;
+Music w;
+Music k;
+Music wrong;
 Music KillSound;
+void PopSound(){
+	
+	if(!pop.openFromFile("sounds/pop.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	pop.setVolume(100.f);
+	pop.play();
+}
+void startSound(){
+	
+	if(!start.openFromFile("sounds/board-start.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	start.play();
+}
+void checkerSound(){
+	
+	if(!checker.openFromFile("sounds/checker.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	checker.play();
+}
+void winSound(){
+
+	if(!w.openFromFile("sounds/win.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	w.play();
+}
+void KingSound(){
+
+	if(!k.openFromFile("sounds/king.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	k.play();
+}
+void wrongMoveSound(){
+
+	if(!wrong.openFromFile("sounds/wrong_piece.ogg")){
+		cout << "Error loading sound" << endl;
+	}
+	wrong.play();
+}
 void killSound(){
 
 	if(!KillSound.openFromFile("sounds/kill.ogg")){
@@ -406,6 +142,7 @@ void killSound(){
 	}
 	KillSound.play();
 }
+
 void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, int &captureCol, int &n){
     // Update the game state
 	pieces[n].setPosition(newCol * tileSize, newRow * tileSize);
@@ -429,12 +166,14 @@ void Kill(int &oldRow, int &oldCol, int &newRow, int &newCol, int &captureRow, i
 			cout << "Red Score: " << player1.red_score << endl;
 			player1.black_left--;
 			cout << "Black Left: " << player1.black_left << endl;
+			cout << "---------------------------------" << endl;	//print line
 		}
 		else{
 			player1.black_score++;
 			cout << "Black Score: " << player1.black_score << endl;
 			player1.red_left--;
 			cout << "Red Left: " << player1.red_left << endl;
+			cout << "---------------------------------" << endl;	//print line
 		}
         pieces[capturedPieceIndex].setPosition(-100, -100); // Move it off the screen
 		killSound();
@@ -502,123 +241,6 @@ bool isValidMoveAvailable(Player& player, int pieceIndex)
 
     return false;
 }
-Music pop;
-void PopSound(){
-	
-	if(!pop.openFromFile("sounds/pop.ogg")){
-		cout << "Error loading sound" << endl;
-	}
-	pop.setVolume(100.f);
-	pop.play();
-}
-Music start;
-void startSound(){
-	
-	if(!start.openFromFile("sounds/board-start.ogg")){
-		cout << "Error loading sound" << endl;
-	}
-	start.play();
-}
-Music checker;
-void checkerSound(){
-	
-	if(!checker.openFromFile("sounds/checker.ogg")){
-		cout << "Error loading sound" << endl;
-	}
-	checker.play();
-}
-Music w;
-void winSound(){
-
-	if(!w.openFromFile("sounds/win.ogg")){
-		cout << "Error loading sound" << endl;
-	}
-	w.play();
-}
-Music k;
-void KingSound(){
-
-	if(!k.openFromFile("sounds/king.ogg")){
-		cout << "Error loading sound" << endl;
-	}
-	k.play();
-}
-Music wrong;
-void wrongMoveSound(){
-
-	if(!wrong.openFromFile("sounds/wrong_piece.ogg")){
-		cout << "Error loading sound" << endl;
-	}
-	wrong.play();
-}
-
-
-
-
-//RectangleShape tile(sf::Vector2f(tileSize, tileSize));	//create tile   (global variable)
-// CircleShape checkerPiece(40.f);                         //create checker piece  (global variable)
-
-// void drawChessBoard(RenderWindow &window){              //draw chess board function
-
-	
-// 	bool isWhite = true;	//is tile white or black
-
-// 	for(int i = 0; i < boardSize; i++){                 //for loop
-// 		for(int j = 0; j < boardSize; j++){             //nested for loop
-// 			tileValue[i][j] = -99;                      //set tile value to -99
-// 		}
-// 	}
-   
-//     for (int i = 0; i < boardSize; ++i){		//draw board
-//         for (int j = 0; j < boardSize; ++j){	//draw board
-
-//             tile.setFillColor(isWhite ? sf::Color::White : sf::Color::Black);	//if white true then color white else color black
-//             tile.setPosition(j * tileSize, i * tileSize);						//set position of tile within the row
-//             window.draw(tile);													//draw tile
-// 			if(tile.getFillColor() == sf::Color::Black){                        //if tile is black
-// 				tileValue[i][j] = 0;                                            //set tile value to 0
-// 			}
-//             isWhite = !isWhite;													//flip color
-//         }
-//         isWhite = !isWhite;														//flip color before next row
-//     }	
-// }
-//--
-// void drawCheckerPiece(RenderWindow &window){        //draw chess board function
-
-// 	bool isRed = true;	//is piece white or black
-// 	int player1Pieces = 12;     //number of pieces for player 1     
-// 	int player2Pieces = 12;     //number of pieces for player 2
-
-// 	int Player1Tiles = 3;       //number of rows of tiles for player 1
-// 	int Player2Tiles = 5;       //number of starting rows of tiles for player 2
-
-//     for (int i = 0; i < boardSize; ++i){		//draw board
-//         for (int j = 0; j < boardSize; ++j){	//draw board
-// 				if(i < Player1Tiles){                                    //if row is less than player 1 tiles
-
-// 					checkerPiece.setFillColor(isRed ? sf::Color::Red : sf::Color::Blue);	//if red true then color red else color blue
-// 					checkerPiece.setPosition(j * tileSize, i * tileSize);               //set position of piece within the row
-// 					if(tileValue[i][j] == 0){                                        //if tile value is 0
-// 						window.draw(checkerPiece);                                  //draw piece
-// 						tileValue[i][j] =  1;                                       //set tile value to 1
-// 					}
-// 					isRed = !isRed;													//flip color
-// 				}
-// 				else if(Player2Tiles <= i){
-// 					checkerPiece.setFillColor(isRed ? sf::Color::Blue : sf::Color::Red);	//if red true then color blue else color red
-// 					checkerPiece.setPosition(j * tileSize, i * tileSize);           //set position of piece within the row
-// 					if(tileValue[i][j] == 0){                                       //if tile value is 0
-// 						window.draw(checkerPiece);                                  //draw piece
-// 						tileValue[i][j] =  1;                                       //set tile value to 1
-// 					}
-// 					isRed = !isRed;                                                 //flip color
-// 				}
-// 		}
-// 		isRed = !isRed;														//flip color before next row	
-// 	}
-// }
-
 
 int main()
 {
@@ -634,8 +256,7 @@ int main()
 
 	bool movePiece = false;	//check if piece is moving
 	float dx = 0, dy = 0;	//delta x and delta y
-	int n = 0;
-	bool call_is_capture;
+	int n = 0;	//piece index
 	int king[24];		//array to store if piece is king
 	for (int i = 0; i < 24; i++)//initializing king array
 	{
@@ -648,13 +269,13 @@ int main()
 
 
 	Texture red, black, board;								//create texture
-	if(!red.loadFromFile("red_piece.png")){		//if texture does not load
+	if(!red.loadFromFile("sprites/red_piece.png")){		//if texture does not load
 		cout << "Error loading red piece" << endl;	//print error message
 	}
-	if(!board.loadFromFile("board0.png")){		//if texture does not load
+	if(!board.loadFromFile("sprites/board0.png")){		//if texture does not load
 		cout << "Error loading the game board" << endl;	//print error message
 	}
-	if(!black.loadFromFile("black.png")){		//if texture does not load
+	if(!black.loadFromFile("sprites/black.png")){		//if texture does not load
 		cout << "Error loading black piece" << endl;	//print error message
 	}
 
@@ -670,7 +291,7 @@ int main()
 	blackPiece.setTexture(black);					//set texture to sprite	
 
 	Font font;
-	if (!font.loadFromFile("arial.ttf")) {
+	if (!font.loadFromFile("font/arial.ttf")) {
 		cout << "Error loading font" << endl;
 	}
 
@@ -698,7 +319,6 @@ int main()
         {
 			switch (event.type) //switch statement for event type
 			{ 
-				//sleep(seconds(3));//adding delay
 				case sf::Event::KeyReleased:
 					switch (event.key.code)
 					{
@@ -714,7 +334,6 @@ int main()
 						switch (menU.GetPressedItem())
 						{
 						case 0:
-							cout << "Play button has been pressed" << endl;
 							menu = false;
 							instruc = true;
 							game = false;
@@ -759,7 +378,6 @@ int main()
 							switch (selectedItem)
 							{
 							case 0:
-								std::cout << "Play button has been pressed" << std::endl;
 								menu = false;
 								instruc = true;
 								game = false;
@@ -777,7 +395,6 @@ int main()
 							if(pieces[i].getGlobalBounds().contains(event.mouseButton.x, event.mouseButton.y)){	//if mouse is within bounds of sprite
 								if(pieces[i].getTexture() == &red){	//if texture is red
 									if(player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2){
-										cout << "Red piece selected" << endl;	//print message
 										player1.pieceSelected = true;	//set piece selected to true
 										movePiece = true;	//set move piece to true
 										n = i;
@@ -788,14 +405,14 @@ int main()
 										player1.switchPlayerTurn();	//switch player turn
 									}
 									else{
-										cout << "It is Black Player turn" << endl;	//print message
+										cout << "It is Player 1's turn" << endl;	//print message
+										cout << "---------------------------------" << endl;	//print line
 										player1.notYourTurn = 1;	//set not your turn to 1
 									}
 
 								}
 								else if(pieces[i].getTexture() == &black){	//if texture is black
 									if(player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2){
-										cout << "Black piece selected" << endl;	//print message
 										player1.pieceSelected = true;	//set piece selected to true
 										movePiece = true;	//set move piece to true
 										n = i;
@@ -806,18 +423,20 @@ int main()
 										player1.switchPlayerTurn();	//switch player turn
 									}
 									else{
-										cout << "It is Red Player turn" << endl;	//print message
+										cout << "It is Player 2's turn" << endl;	//print message
+										cout << "---------------------------------" << endl;	//print line
 										player1.notYourTurn = 1;	//set not your turn to 1
 									}
 								}
 								else{
 									cout << "Select a piece" << endl;	//print message
+									cout << "---------------------------------" << endl;	//print line
 								}
 								
 							}
 						}
-						cout << "mouse x: " << mousePos.x << endl;  //print mouse x position
-						cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
+						// cout << "mouse x: " << mousePos.x << endl;  //print mouse x position
+						// cout << "mouse y: " << mousePos.y << endl;  //print mouse y position
 					}
 					else if(result == true){
 						
@@ -856,18 +475,16 @@ int main()
 									if(board_arr[newRow][newCol] == 0){
 										if (abs(newRow - oldRow) == 2 && abs(newCol - oldCol) == 2) {
 											if (((player1.currentPlayerPiece == 1 || player1.currentKingPiece == 2) && newRow > oldRow) || ((player1.currentPlayerPiece == -1 || player1.currentKingPiece == -2) && newRow < oldRow) || board_arr[oldRow][oldCol] == 2 || board_arr[oldRow][oldCol] == -2) {
-												cout << "Jump Check" << endl;
 												// Check if the move is a jump
 												int jumpRow = (newRow + oldRow) / 2;
 												int jumpCol = (newCol + oldCol) / 2;
 
 												if (board_arr[jumpRow][jumpCol] != 0) {
 													// Valid jump
-													cout << "Kill func call" << endl;
 													Kill(oldRow, oldCol, newRow, newCol, jumpRow, jumpCol, n);
-													// checkerSound();
 													if (canPieceCaptureAgain(newRow, newCol, player1.currentPlayerPiece, board_arr[newRow][newCol])) {
 														cout << "You can capture again!" << endl;
+														cout << "---------------------------------" << endl;	//print line
 														oldPos = newPos; // Update the old position to the new position
 														
 													} else {
@@ -875,18 +492,13 @@ int main()
 														player1.pieceSelected = false;
 														player1.switchPlayerTurn();
 													}
-													cout << "Checking king promotion conditions..." << endl;
 													if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
 														(player1.currentPlayerPiece == -1 && newRow == 0)) {
 															// King me
 															player1.currentPlayerPiece = player1.currentPlayerPiece * 2;
 															board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
-															cout << "King me!" << endl;
 															king[n] = 1;//set king to 1
 															KingSound();
-													}
-													else{
-														cout << "Not king me!" << endl;
 													}
 												}
 												else{
@@ -910,18 +522,13 @@ int main()
 												board_arr[oldRow][oldCol] = 0;
 												player1.moves++;
 												checkerSound();
-												cout << "Checking king promotion conditions..." << endl;
 												if ((player1.currentPlayerPiece == 1 && newRow == boardSize - 1) ||
 													(player1.currentPlayerPiece == -1 && newRow == 0)) {
 														// King me
 														player1.currentPlayerPiece = player1.currentPlayerPiece * 2;
 														board_arr[newRow][newCol] = player1.currentPlayerPiece; // Mark as king
-														cout << "King me!" << endl;
 														king[n] = 1;//set king to 1
 														KingSound();
-												}
-												else{
-													cout << "Not king me!" << endl;
 												}
 												player1.pieceSelected = false;
 												
@@ -966,30 +573,32 @@ int main()
 								pieces[n].setPosition(originalPos);
 								wrongMoveSound();
 							}
-							
-
-							cout << "board_arr[newRow][newCol] = " << board_arr[newRow][newCol] << endl;
-							cout << "board_arr[oldRow][oldCol] = " << board_arr[oldRow][oldCol] << endl;
-							// print whole board values
-							for(int i = 0; i < boardSize; i++){
-								for(int j = 0; j < boardSize; j++){
-									cout << board_arr[i][j] << " ";
-								}
-								cout << endl;
+							else{
+								// Invalid move, revert to the original position
+								player1.switchPlayerTurn();	//switch player turn
+								pieces[n].setPosition(originalPos);
+								wrongMoveSound();
 							}
+							// print whole board values ONLY FOR DEBUGGING
+							// for(int i = 0; i < boardSize; i++){
+							// 	for(int j = 0; j < boardSize; j++){
+							// 		cout << board_arr[i][j] << " ";
+							// 	}
+							// 	cout << endl;
+							// }
 							if(player1.moves == 32 || (player1.black_left<=1 && player1.red_left>2) || (player1.red_left<=1 && player1.black_left>2)){
-								cout << "Game over!" << endl;
+								//Game Over
 								if(player1.moves == 32){
 									if(player1.black_score > player1.red_score){
-										cout << "Player 1 wins!" << endl;
+										//Player1 wins
 										gameover.setFont(1,1);
 									}
 									else if(player1.black_score < player1.red_score){
-										cout << "Player 2 wins!" << endl;
+										//Player 2 wins!
 										gameover.setFont(1,2);
 									}
 									else if(player1.black_score == player1.red_score){
-										cout << "It's a draw!" << endl;
+										//It's a draw!
 										gameover.setFont(1,3);
 									}
 									result = true;
@@ -998,7 +607,7 @@ int main()
 									winSound();
 								}
 								else if(player1.black_left<=1 && player1.red_left>2){
-									cout << "Player 2 wins!" << endl;
+									//Player 2 wins!
 									gameover.setFont(2,0);
 									result = true;
 									menu = false;
@@ -1006,7 +615,7 @@ int main()
 									winSound();
 								}
 								else if(player1.black_left>2 && player1.red_left<=1){
-									cout << "Player 1 wins!" << endl;
+									//Player 1 wins!"
 									gameover.setFont(3,0);
 									result = true;
 									menu = false;
@@ -1016,7 +625,7 @@ int main()
 							}
 							else if((player1.black_left<=1 && player1.red_left<=2) || (player1.red_left<=1 && player1.black_left<=2)){
 								if(player1.black_left == 0){
-									cout << "Player 2 wins!" << endl;
+									//Player 2 wins!"
 									gameover.setFont(2,0);
 									result = true;
 									menu = false;
@@ -1024,7 +633,7 @@ int main()
 									winSound();
 								}
 								else if(player1.red_left == 0){
-									cout << "Player 1 wins!" << endl;
+									//Player 1 wins!"
 									gameover.setFont(3,0);
 									result = true;
 									menu = false;
@@ -1032,12 +641,10 @@ int main()
 									winSound();
 								}
 								else{
-									cout << "Game Continues!" << endl;
+									//Game Continues!"
 								}
 							}
-
 						}
-						
 					}
 				}else{
 					if(game == true){
@@ -1101,7 +708,7 @@ int main()
 			}
 		}
 		else if(result == true){
-			window.draw(boardSprite);	//draw board
+			window.clear(Color::White);	//draw board
 			gameover.draw(window);
 		}
         window.display();    //display window
