@@ -10,6 +10,7 @@ The SFML Checker Game is a classic two-player board game designed and developed 
 -Scoring Kills
 
 **To Play:**
-Just Launch the .exe file
+You need to install and set the SFML library in your system in order to run and play the game. 
+For this project, VsCode was used as the IDE.
 
 *Major Bugs of the game were fixed. However, there are some minor bugs present in the game.
