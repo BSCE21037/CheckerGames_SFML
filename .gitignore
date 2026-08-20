@@ -1,0 +1,8 @@
+# Build output
+checkers
+checkers.exe
+*.o
+*.exe
+
+# macOS
+.DS_Store
