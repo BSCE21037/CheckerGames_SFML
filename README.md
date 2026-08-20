@@ -14,7 +14,29 @@ The SFML Checker Game is a classic two-player board game designed and developed 
 -Scoring Kills
 
 **To Play:**
-You need to install and set the SFML library in your system in order to run and play the game. 
-For this project, VsCode was used as the IDE.
+
+The game runs on macOS, Linux and Windows. You need the SFML 2.x library installed, then build with the included `Makefile`.
+
+*macOS*
+```
+brew install sfml@2
+make run
+```
+
+*Linux (Debian/Ubuntu)*
+```
+sudo apt install build-essential libsfml-dev
+make run
+```
+
+*Windows (MinGW)*
+```
+mingw32-make run
+```
+Windows uses the bundled `SFML-2.5.1/` folder; make sure the DLLs in `SFML-2.5.1/bin` are next to the executable or on your `PATH`.
+
+Run the game from the project root — the sprites, sounds and font are loaded via relative paths.
+
+For this project, VsCode was used as the IDE (`.vscode/` contains build/debug tasks for both macOS and Windows).
 
 *Major Bugs of the game were fixed. However, there are some minor bugs present in the game.
