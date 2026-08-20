@@ -1,0 +1,8 @@
+﻿Project Sanity Check Report
+Generated: 2026-08-20 16:59:23
+Scanned path: D:\Projects\SFML\CheckerGames_SFML
+Excluded dirs: SFML-2.5.1, .git, .vscode, build, bin, obj
+
+Source files found: 5 (5 .cpp, 0 headers)
+
+No files exceed the 100KB threshold.
